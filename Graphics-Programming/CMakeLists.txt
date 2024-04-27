@@ -1,16 +1,20 @@
+project(graphics-programming)
 
-# This is the Learn-OpenGL CMake file
-# Make executable named ${PROJECT_NAME} from main.cpp
-add_executable(${PROJECT_NAME} src/main.cpp)
+# Get a list of all .cpp files in the directory and its subdirectories
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+
+# Add all the .cpp files to the executable
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)
+
 # Lib Linking
 target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
-# copy dir to build
+# Copy directory to build
 add_custom_target(copyResources
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/res
