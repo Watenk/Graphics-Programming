@@ -7,7 +7,7 @@
 
 // Public
 
-Shader::Shader(const std::string shadersPath, const std::string shaderName){
+Shader::Shader(const std::string& shadersPath, const std::string& shaderName){
     // Shader Parseing
     std::string vertexString = FileUtil::parsePath(shadersPath + "/" + shaderName + ".vert");
     std::string fragmentString = FileUtil::parsePath(shadersPath + "/" + shaderName + ".frag");
@@ -17,13 +17,16 @@ Shader::Shader(const std::string shadersPath, const std::string shaderName){
     const unsigned int fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentString);
 
     // Shader Program
-    id = createShaderProgram(vertexShader, fragmentShader);
+    shaderProgramID = createShaderProgram(vertexShader, fragmentShader);
 }
 
-void Shader::use() const{
-    glUseProgram(id);
+void Shader::bind() const{
+    glUseProgram(shaderProgramID);
 }
 
+Shader::~Shader(){
+    glDeleteProgram(shaderProgramID);
+}
 
 // Private
 

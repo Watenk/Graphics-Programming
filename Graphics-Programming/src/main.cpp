@@ -3,15 +3,13 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <stb_image.h>
 
 #include "Shader.h"
+#include "Mesh.h"
 
 // Forward Declaration
 int init(GLFWwindow* &window, const char* windowName);
-std::string parsePath(const std::string& filepath);
-unsigned int compileShader(unsigned int type, const std::string& source);
-unsigned int createShaderProgram(unsigned int vertexShader, unsigned int fragmentShader);
-
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);  
 void processInput(GLFWwindow *window);
 
@@ -25,8 +23,7 @@ int main(){
     /* Shaders */
     Shader basicShader("res/shaders", "basic");
 
-    /* Vertex Data, VAO, VBO, EBO and Vertex Attributes */
-    /* Data */
+    /* Mesh */
     float vertexData[] = {
         // Pos                // Color
          0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,  // top right (0)
@@ -35,53 +32,23 @@ int main(){
         -0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 0.0f,  // top left  (3)
     };
 
+    int attributeLenghts[] = {
+        // Pos    // Color
+        3,        3,
+    };
+
     unsigned int indices[] = {  
         0, 1, 3,   // first triangle
         1, 2, 3    // second triangle
+
+        //  (3)-------(0)
+        //   |   \     |
+        //   |    \    |
+        //   |     \   |
+        //  (2)-------(1)
     }; 
 
-    //  (3)-------(0)
-    //   |   \     |
-    //   |    \    |
-    //   |     \   |
-    //  (2)-------(1)
-
-    unsigned int VAO, VBO, EBO;
-
-    /* Generate buffers */
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    /* VAO */
-    glBindVertexArray(VAO);
-
-    /* VBO */
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-
-    /* EBO */
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    /* Vertex Attributes */
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // color attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    /* Cleanup */
-    /* note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind */
-    glBindBuffer(GL_ARRAY_BUFFER, 0); // Clears the VBO
-
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    glBindVertexArray(0); // Clears the VAO
-
-    // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Clears the EBO
+    Mesh quadMesh(basicShader, GL_STATIC_DRAW, vertexData, sizeof(vertexData), 2, attributeLenghts, indices, 6);
 
     // Wireframe Mode
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -94,26 +61,14 @@ int main(){
         processInput(window);
         
         // Draw ----------------
-        // Shader
-        basicShader.use();
-        //int vertexColorLocation = glGetUniformLocation(basicShaderProgram, "ourColor");
-        //glUniform4f(vertexColorLocation, 0.0f, 1.0f, 0.0f, 1.0f);
 
-        // Vertex Data
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        quadMesh.draw();
 
         // Draw end -----------
 
         glfwSwapBuffers(window);
         glfwPollEvents(); // Windows Window Events
     }
-
-    /* Cleanup */
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteProgram(basicShader.id);
 
     glfwTerminate();
     return 0;

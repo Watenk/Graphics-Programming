@@ -4,22 +4,21 @@
 
 class Shader{
 public:
-    unsigned int id;
-    
     /**
      * Takes the path of the vertex and fragment shader and parses, compiles and makes a shader program from it
      * @param shadersPath is the path of the dir that contains the shaders
      * @param shaderName is the name of the vertexShader and fragmentShader
     */
-    Shader(const std::string shadersPath, const std::string shaderName);
+    Shader(const std::string& shadersPath, const std::string& shaderName);
+    ~Shader();
 
-
-    /**
-     * Assignes this shader program as the current shader program of openGL
-    */
-    void use() const;
+    /* Binds this shader program as the current shader program of OpenGL */
+    void bind() const;
 
 private:
+    unsigned int shaderProgramID;
+
+    Shader();
 
     /**
      * Compiles a GLSL string to a shader

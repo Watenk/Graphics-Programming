@@ -11,6 +11,7 @@ find_package(OpenGL REQUIRED)
 
 # Lib Linking
 target_link_libraries(${PROJECT_NAME} PRIVATE glad)
+target_link_libraries(${PROJECT_NAME} PRIVATE std-image)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
