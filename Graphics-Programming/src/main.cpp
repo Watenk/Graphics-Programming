@@ -3,10 +3,10 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <stb_image.h>
 
 #include "Shader.h"
 #include "Mesh.h"
+#include "Texture2D.h"
 
 // Forward Declaration
 int init(GLFWwindow* &window, const char* windowName);
@@ -20,21 +20,18 @@ int main(){
     int initCode = init(window, "Graphics Programming");
     if (initCode != 0) return initCode;
 
-    /* Shaders */
-    Shader basicShader("res/shaders", "basic");
-
     /* Mesh */
     float vertexData[] = {
-        // Pos                // Color
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,  // top right (0)
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,  // bottom right (1)
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  // bottom left (2)
-        -0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 0.0f,  // top left  (3)
+         // positions         // colors          // UV
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
     };
 
     int attributeLenghts[] = {
-        // Pos    // Color
-        3,        3,
+        // Pos    // Color    //UV
+        3,        3,          2,
     };
 
     unsigned int indices[] = {  
@@ -48,7 +45,9 @@ int main(){
         //  (2)-------(1)
     }; 
 
-    Mesh quadMesh(basicShader, GL_STATIC_DRAW, vertexData, sizeof(vertexData), 2, attributeLenghts, indices, 6);
+    Texture2D crateTexture("res/textures/crate.jpg", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+    Shader textureTestShader("res/shaders", "textureTest");
+    Mesh quadMesh(GL_STATIC_DRAW, vertexData, sizeof(vertexData), 3, attributeLenghts, indices, 6);
 
     // Wireframe Mode
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -62,7 +61,10 @@ int main(){
         
         // Draw ----------------
 
-        quadMesh.draw();
+        quadMesh.bind();
+        textureTestShader.bind();
+        crateTexture.bind();
+        glDrawElements(GL_TRIANGLES, quadMesh.getIndicesAmount(), GL_UNSIGNED_INT, 0);
 
         // Draw end -----------
 

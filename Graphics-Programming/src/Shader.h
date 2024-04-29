@@ -18,15 +18,12 @@ public:
 private:
     unsigned int shaderProgramID;
 
-    Shader();
-
     /**
      * Compiles a GLSL string to a shader
      * @param type GL_VERTEX_SHADER or GL_FRAGMENT_SHADER
      * @returns A compiled shader
     */
     const unsigned int compileShader(const unsigned int type, const std::string& source);
-
 
     /**
      * Creates a shader program and links the vertex and fragment Shader to it. The shaders will be deleted afterwards

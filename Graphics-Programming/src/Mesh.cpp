@@ -2,19 +2,21 @@
 
 #include <glad/glad.h>
 
-Mesh::Mesh(Shader& shader, const int usage, const float vertexData[], const int vertexDataSize, const int attributeAmount, const int attributeLenghts[], const unsigned int indices[], const int indicesAmount) : shader(shader), indicesAmount(indicesAmount){
+Mesh::Mesh(const int usage, const float vertexData[], const int vertexDataSize, const int attributeAmount, const int attributeLenghts[], const unsigned int indices[], const int indicesAmount) : indicesAmount(indicesAmount){
 
     /* Offsets and Stride */
+    int attributeSizes[attributeAmount];
     int attributeOffsets[attributeAmount];
     int stride = 0;
 
+    attributeSizes[0] = sizeof(float) * attributeLenghts[0];
+    stride += attributeSizes[0];
     attributeOffsets[0] = 0;
-    stride += sizeof(float) * attributeLenghts[0];
     if (attributeAmount > 1){
         for (int i = 1; i < attributeAmount; i++){
-            int attributeSize = sizeof(float) * attributeLenghts[i];
-            attributeOffsets[i] = attributeSize + attributeOffsets[i - 1];
-            stride += attributeSize;
+            attributeSizes[i] = sizeof(float) * attributeLenghts[i];
+            stride += attributeSizes[i];
+            attributeOffsets[i] = attributeSizes[i - 1] + attributeOffsets[i - 1];
         }
     }
 
@@ -58,10 +60,8 @@ Mesh::~Mesh(){
     glDeleteBuffers(1, &EBO);
 }
 
-void Mesh::draw() const{
-    bind();
-    shader.bind();
-    glDrawElements(GL_TRIANGLES, indicesAmount, GL_UNSIGNED_INT, 0);
+const int Mesh::getIndicesAmount() const{
+    return indicesAmount;
 }
 
 // private
