@@ -5,7 +5,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-Texture2D::Texture2D(const std::string& texturePath, const int wrappingMode, const int minimizeFilterMode, const int magnifyFilterMode){
+Texture2D::Texture2D(const std::string& texturePath, const int sourceFormat, const int wrappingMode, const int minimizeFilterMode, const int magnifyFilterMode){
+
+    stbi_set_flip_vertically_on_load(true);  
+
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture); 
 
@@ -21,7 +24,7 @@ Texture2D::Texture2D(const std::string& texturePath, const int wrappingMode, con
     int width, height, nrChannels;
     unsigned char *data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
     if (data){
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, sourceFormat, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else{
@@ -30,6 +33,10 @@ Texture2D::Texture2D(const std::string& texturePath, const int wrappingMode, con
 
     /* Cleanup */
     stbi_image_free(data);
+}
+
+Texture2D::~Texture2D(){
+    glDeleteTextures(1, &texture);
 }
 
 void Texture2D::bind() const{

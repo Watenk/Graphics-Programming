@@ -20,12 +20,16 @@ Shader::Shader(const std::string& shadersPath, const std::string& shaderName){
     shaderProgramID = createShaderProgram(vertexShader, fragmentShader);
 }
 
+Shader::~Shader(){
+    glDeleteProgram(shaderProgramID);
+}
+
 void Shader::bind() const{
     glUseProgram(shaderProgramID);
 }
 
-Shader::~Shader(){
-    glDeleteProgram(shaderProgramID);
+unsigned int Shader::getShaderProgramID() const{
+    return shaderProgramID;
 }
 
 // Private

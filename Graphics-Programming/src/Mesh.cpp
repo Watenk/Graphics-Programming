@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 
-Mesh::Mesh(const int usage, const float vertexData[], const int vertexDataSize, const int attributeAmount, const int attributeLenghts[], const unsigned int indices[], const int indicesAmount) : indicesAmount(indicesAmount){
+Mesh::Mesh(const int usage, const float vertexData[], const int vertexDataSize, const int attributeAmount, const int attributeLenghts[], const int indicesAmount, const unsigned int indices[]) : indicesAmount(indicesAmount){
 
     /* Offsets and Stride */
     int attributeSizes[attributeAmount];

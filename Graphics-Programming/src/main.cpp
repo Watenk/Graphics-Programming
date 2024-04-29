@@ -45,9 +45,15 @@ int main(){
         //  (2)-------(1)
     }; 
 
-    Texture2D crateTexture("res/textures/crate.jpg", GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+    Texture2D crateTexture("res/textures/crate.jpg", GL_RGB, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+    Texture2D smileTexture("res/textures/smile.png", GL_RGBA, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+
     Shader textureTestShader("res/shaders", "textureTest");
-    Mesh quadMesh(GL_STATIC_DRAW, vertexData, sizeof(vertexData), 3, attributeLenghts, indices, 6);
+    textureTestShader.bind();
+    glUniform1i(glGetUniformLocation(textureTestShader.getShaderProgramID(), "texture1"), 0);
+    glUniform1i(glGetUniformLocation(textureTestShader.getShaderProgramID(), "texture2"), 1);
+
+    Mesh quadMesh(GL_STATIC_DRAW, vertexData, sizeof(vertexData), 3, attributeLenghts, 6, indices);
 
     // Wireframe Mode
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -63,7 +69,13 @@ int main(){
 
         quadMesh.bind();
         textureTestShader.bind();
+
+        /* Textures */
+        glActiveTexture(GL_TEXTURE0);
         crateTexture.bind();
+        glActiveTexture(GL_TEXTURE1);
+        smileTexture.bind();
+
         glDrawElements(GL_TRIANGLES, quadMesh.getIndicesAmount(), GL_UNSIGNED_INT, 0);
 
         // Draw end -----------

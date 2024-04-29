@@ -14,7 +14,7 @@ public:
      * @param attributeLenghts the size of each vertex attribute (pos has lenght of 3 (x, y, z))
      * @param indices the order the vertices are drawn
     */
-    Mesh(const int usage, const float vertexData[], const int vertexDataSize, const int attributeAmount, const int attributeLenghts[], const unsigned int indices[], const int indicesAmount); 
+    Mesh(const int usage, const float vertexData[], const int vertexDataSize, const int attributeAmount, const int attributeLenghts[], const int indicesAmount, const unsigned int indices[]); 
     ~Mesh();
     
     /* Binds this VAO as the current VAO of OpenGL */
