@@ -2,9 +2,10 @@ project(graphics-programming)
 
 # Get a list of all .cpp files in the directory and its subdirectories
 file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE HEADERS "src/*.h")
 
 # Add all the .cpp files to the executable
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)
@@ -13,6 +14,7 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE glad)
 target_link_libraries(${PROJECT_NAME} PRIVATE std-image)
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+target_link_libraries(${PROJECT_NAME} PRIVATE glm)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
 
 # Copy directory to build
