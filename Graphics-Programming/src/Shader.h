@@ -15,7 +15,7 @@ public:
     /* Binds this shader program as the current shader program of OpenGL */
     void bind() const;
 
-    unsigned int getShaderProgramID() const;
+    unsigned int getID() const;
 
 private:
     unsigned int shaderProgramID;

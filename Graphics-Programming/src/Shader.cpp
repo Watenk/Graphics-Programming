@@ -28,7 +28,7 @@ void Shader::bind() const{
     glUseProgram(shaderProgramID);
 }
 
-unsigned int Shader::getShaderProgramID() const{
+unsigned int Shader::getID() const{
     return shaderProgramID;
 }
 
