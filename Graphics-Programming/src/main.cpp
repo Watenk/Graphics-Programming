@@ -25,16 +25,16 @@ int main(){
 
     /* Mesh */
     float vertexData[] = {
-         // positions         // colors          // UV
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
+         // positions         // UV
+         0.5f,  0.5f, 0.0f,   1.0f, 1.0f,   // top right
+         0.5f, -0.5f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f,   0.0f, 1.0f    // top left 
     };
 
     int attributeLenghts[] = {
-        // Pos    // Color    //UV
-        3,        3,          2,
+        // Pos   //UV
+        3,       2,
     };
 
     unsigned int indices[] = {  
@@ -51,16 +51,20 @@ int main(){
     Texture2D crateTexture("res/textures/crate.jpg", GL_RGB, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
     Texture2D smileTexture("res/textures/smile.png", GL_RGBA, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 
-    Shader textureTestShader("res/shaders", "textureTest");
-    textureTestShader.bind();
-    glUniform1i(glGetUniformLocation(textureTestShader.getID(), "texture1"), 0);
-    glUniform1i(glGetUniformLocation(textureTestShader.getID(), "texture2"), 1);
+    Shader modelViewProjection("res/shaders", "modelViewProjection");
+    modelViewProjection.bind();
+    glUniform1i(glGetUniformLocation(modelViewProjection.getID(), "texture1"), 0);
+    glUniform1i(glGetUniformLocation(modelViewProjection.getID(), "texture2"), 1);
 
-    glm::mat4 trans = glm::mat4(1.0f); // Create identity matrix
-    trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-    trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));  
+    Mesh quadMesh(GL_STATIC_DRAW, vertexData, sizeof(vertexData), 2, attributeLenghts, 6, indices);
 
-    Mesh quadMesh(GL_STATIC_DRAW, vertexData, sizeof(vertexData), 3, attributeLenghts, 6, indices);
+    // Transformation matrices
+    glm::mat4 model = glm::mat4(1.0f); // Model Matrix
+    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotation applied to moddel matrix
+    glm::mat4 view = glm::mat4(1.0f); // View Matrix
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); // Translation applied to view matrix (its camera movement) - (note that we're translating the scene in the reverse direction of where we want to move)
+    glm::mat4 projection; // Projection Matrix
+    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); // Perspective
 
     // Wireframe Mode
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -72,16 +76,14 @@ int main(){
         glClear(GL_COLOR_BUFFER_BIT); // Clear color buffer
         processInput(window);
 
-        // // RotateScaleTranslate
-        glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        glUniformMatrix4fv(glGetUniformLocation(textureTestShader.getID(), "transform"), 1, GL_FALSE, glm::value_ptr(trans));
-
         // Draw ----------------
 
         quadMesh.bind();
-        textureTestShader.bind();
+        modelViewProjection.bind();
+        // // RotateScaleTranslate
+        glUniformMatrix4fv(glGetUniformLocation(modelViewProjection.getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(modelViewProjection.getID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(modelViewProjection.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         /* Textures */
         glActiveTexture(GL_TEXTURE0);
