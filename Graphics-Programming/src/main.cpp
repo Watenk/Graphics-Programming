@@ -25,46 +25,80 @@ int main(){
 
     /* Mesh */
     float vertexData[] = {
-         // positions         // UV
-         0.5f,  0.5f, 0.0f,   1.0f, 1.0f,   // top right
-         0.5f, -0.5f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f,   // bottom left
-        -0.5f,  0.5f, 0.0f,   0.0f, 1.0f    // top left 
+        // positions            // tex coords    // normals
+        0.5f, -0.5f, -0.5f,      1.f, 0.f,       0.f, -1.f,  0.f,
+        0.5f, -0.5f,  0.5f,      1.f, 1.f,       0.f, -1.f,  0.f,
+       -0.5f, -0.5f,  0.5f,      0.f, 1.f,       0.f, -1.f,  0.f,
+       -0.5f, -0.5f, -0.5f,      0.f, 0.f,       0.f, -1.f,  0.f,
+
+        0.5f,  0.5f, -0.5f,      2.f, 0.f,       1.f,  0.f,  0.f,
+        0.5f,  0.5f,  0.5f,      2.f, 1.f,       1.f,  0.f,  0.f,
+
+        0.5f,  0.5f,  0.5f,      1.f, 2.f,       0.f,  0.f,  1.f,
+       -0.5f,  0.5f,  0.5f,      0.f, 2.f,       0.f,  0.f,  1.f,
+
+       -0.5f,  0.5f,  0.5f,     -1.f, 1.f,       -1.f, 0.f,  0.f,
+       -0.5f,  0.5f, -0.5f,     -1.f, 0.f,       -1.f, 0.f,  0.f,
+
+       -0.5f,  0.5f, -0.5f,      0.f, -1.f,      0.f,  0.f, -1.f,
+        0.5f,  0.5f, -0.5f,      1.f, -1.f,      0.f,  0.f, -1.f,
+
+       -0.5f,  0.5f, -0.5f,      3.f, 0.f,       0.f,  1.f,  0.f,
+       -0.5f,  0.5f,  0.5f,      3.f, 1.f,       0.f,  1.f,  0.f,
+
+        0.5f, -0.5f,  0.5f,      1.f, 1.f,       0.f,  0.f,  1.f,
+       -0.5f, -0.5f,  0.5f,      0.f, 1.f,       0.f,  0.f,  1.f,
+
+       -0.5f, -0.5f,  0.5f,      0.f, 1.f,       -1.f, 0.f,  0.f,
+       -0.5f, -0.5f, -0.5f,      0.f, 0.f,       -1.f, 0.f,  0.f,
+
+       -0.5f, -0.5f, -0.5f,      0.f, 0.f,       0.f,  0.f, -1.f,
+        0.5f, -0.5f, -0.5f,      1.f, 0.f,       0.f,  0.f, -1.f,
+
+        0.5f, -0.5f, -0.5f,      1.f, 0.f,       1.f,  0.f,  0.f,
+        0.5f, -0.5f,  0.5f,      1.f, 1.f,       1.f,  0.f,  0.f,
+
+        0.5f,  0.5f, -0.5f,      2.f, 0.f,       0.f,  1.f,  0.f,
+        0.5f,  0.5f,  0.5f,      2.f, 1.f,       0.f,  1.f,  0.f
     };
 
     int attributeLenghts[] = {
-        // Pos   //UV
-        3,       2,
+        // Pos   // UV   // Normals
+        3,       2,      3,
     };
 
-    unsigned int indices[] = {  
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
+    unsigned int indices[] = {
+        // Down
+        0, 1, 2,      // first triangle
+        0, 2, 3,      // second triangle
+        // Back
+        14, 6, 7,     // first triangle
+        14, 7, 15,    // second triangle
+        // Right
+        20, 4, 5,     // first triangle
+        20, 5, 21,    // second triangle
+        // Left
+        16, 8, 9,     // first triangle
+        16, 9, 17,    // second triangle
+        // Front
+        18, 10, 11,   // first triangle
+        18, 11, 19,   // second triangle
+        // Up
+        22, 12, 13,   // first triangle
+        22, 13, 23,   // second triangle
+    };
 
-        //  (3)-------(0)
-        //   |   \     |
-        //   |    \    |
-        //   |     \   |
-        //  (2)-------(1)
-    }; 
+    Mesh quadMesh(GL_STATIC_DRAW, vertexData, sizeof(vertexData), sizeof(attributeLenghts) / sizeof(int), attributeLenghts, sizeof(indices) / sizeof(unsigned int), indices);
 
+    /* Textures */
     Texture2D crateTexture("res/textures/crate.jpg", GL_RGB, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
     Texture2D smileTexture("res/textures/smile.png", GL_RGBA, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
 
+    /* Shaders */
     Shader modelViewProjection("res/shaders", "modelViewProjection");
     modelViewProjection.bind();
     glUniform1i(glGetUniformLocation(modelViewProjection.getID(), "texture1"), 0);
     glUniform1i(glGetUniformLocation(modelViewProjection.getID(), "texture2"), 1);
-
-    Mesh quadMesh(GL_STATIC_DRAW, vertexData, sizeof(vertexData), 2, attributeLenghts, 6, indices);
-
-    // Transformation matrices
-    glm::mat4 model = glm::mat4(1.0f); // Model Matrix
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); // Rotation applied to moddel matrix
-    glm::mat4 view = glm::mat4(1.0f); // View Matrix
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); // Translation applied to view matrix (its camera movement) - (note that we're translating the scene in the reverse direction of where we want to move)
-    glm::mat4 projection; // Projection Matrix
-    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); // Perspective
 
     // Wireframe Mode
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -80,7 +114,15 @@ int main(){
 
         quadMesh.bind();
         modelViewProjection.bind();
-        // // RotateScaleTranslate
+
+        /* Transformation matrices */
+        glm::mat4 model = glm::mat4(1.0f); // Model Matrix
+        glm::mat4 view = glm::mat4(1.0f); // View Matrix
+        glm::mat4 projection; // Projection Matrix
+        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));  // Rotation applied to moddel matrix
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); // Translation applied to view matrix (its camera movement) - (note that we're translating the scene in the reverse direction of where we want to move)
+        projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); // Perspective
+        
         glUniformMatrix4fv(glGetUniformLocation(modelViewProjection.getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(glGetUniformLocation(modelViewProjection.getID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(modelViewProjection.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
