@@ -23,6 +23,10 @@ int main(){
     int initCode = init(window, "Graphics Programming");
     if (initCode != 0) return initCode;
 
+    /* Configure OpenGL */
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wireframe Mode
+    glEnable(GL_DEPTH_TEST); // Enable Depth Test
+
     /* Mesh */
     float vertexData[] = {
         // positions            // tex coords    // normals
@@ -90,30 +94,30 @@ int main(){
 
     Mesh quadMesh(GL_STATIC_DRAW, vertexData, sizeof(vertexData), sizeof(attributeLenghts) / sizeof(int), attributeLenghts, sizeof(indices) / sizeof(unsigned int), indices);
 
+    /* Shaders */
+    Shader mvpShader("res/shaders", "modelViewProjection");
+    mvpShader.bind();
+
     /* Textures */
     Texture2D crateTexture("res/textures/crate.jpg", GL_RGB, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
     Texture2D smileTexture("res/textures/smile.png", GL_RGBA, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
-
-    /* Shaders */
-    Shader modelViewProjection("res/shaders", "modelViewProjection");
-    modelViewProjection.bind();
-    glUniform1i(glGetUniformLocation(modelViewProjection.getID(), "texture1"), 0);
-    glUniform1i(glGetUniformLocation(modelViewProjection.getID(), "texture2"), 1);
-
-    // Wireframe Mode
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glUniform1i(glGetUniformLocation(mvpShader.getID(), "texture1"), 0);
+    glUniform1i(glGetUniformLocation(mvpShader.getID(), "texture2"), 1);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT); // Clear color buffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color buffer
         processInput(window);
 
         // Draw ----------------
 
+        /* Mesh */
         quadMesh.bind();
-        modelViewProjection.bind();
+
+        /* Shader */
+        mvpShader.bind();
 
         /* Transformation matrices */
         glm::mat4 model = glm::mat4(1.0f); // Model Matrix
@@ -122,10 +126,9 @@ int main(){
         model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));  // Rotation applied to moddel matrix
         view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); // Translation applied to view matrix (its camera movement) - (note that we're translating the scene in the reverse direction of where we want to move)
         projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); // Perspective
-        
-        glUniformMatrix4fv(glGetUniformLocation(modelViewProjection.getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(modelViewProjection.getID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(modelViewProjection.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         /* Textures */
         glActiveTexture(GL_TEXTURE0);
@@ -133,6 +136,7 @@ int main(){
         glActiveTexture(GL_TEXTURE1);
         smileTexture.bind();
 
+        /* DrawElement */
         glDrawElements(GL_TRIANGLES, quadMesh.getIndicesAmount(), GL_UNSIGNED_INT, 0);
 
         // Draw end -----------
