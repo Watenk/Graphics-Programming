@@ -123,8 +123,11 @@ int main(){
         glm::mat4 model = glm::mat4(1.0f); // Model Matrix
         glm::mat4 view = glm::mat4(1.0f); // View Matrix
         glm::mat4 projection; // Projection Matrix
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));  // Rotation applied to moddel matrix
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); // Translation applied to view matrix (its camera movement) - (note that we're translating the scene in the reverse direction of where we want to move)
+
+        const float radius = 10.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+        view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
         projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); // Perspective
         glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
