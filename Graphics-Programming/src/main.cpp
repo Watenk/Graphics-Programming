@@ -15,6 +15,15 @@
 int init(GLFWwindow* &window, const char* windowName);
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);  
 void processInput(GLFWwindow *window);
+void calcDeltaTime();
+
+const float cameraSpeed = 3; 
+
+glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
+float deltaTime;
+float lastFrame;
 
 int main(){
 
@@ -98,6 +107,11 @@ int main(){
     Shader mvpShader("res/shaders", "modelViewProjection");
     mvpShader.bind();
 
+    glm::mat4 model = glm::mat4(1.0f); // Model Matrix
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); // Projection Matrix
+    glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
     /* Textures */
     Texture2D crateTexture("res/textures/crate.jpg", GL_RGB, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
     Texture2D smileTexture("res/textures/smile.png", GL_RGBA, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
@@ -106,6 +120,8 @@ int main(){
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
+
+        calcDeltaTime();
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color buffer
@@ -120,18 +136,8 @@ int main(){
         mvpShader.bind();
 
         /* Transformation matrices */
-        glm::mat4 model = glm::mat4(1.0f); // Model Matrix
-        glm::mat4 view = glm::mat4(1.0f); // View Matrix
-        glm::mat4 projection; // Projection Matrix
-
-        const float radius = 10.0f;
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
-        view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-        projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); // Perspective
-        glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         /* Textures */
         glActiveTexture(GL_TEXTURE0);
@@ -192,4 +198,18 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height){
 void processInput(GLFWwindow *window){
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * deltaTime;
+}
+
+void calcDeltaTime(){
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;  
 }
