@@ -10,20 +10,18 @@
 #include "Shader.h"
 #include "Mesh.h"
 #include "Texture2D.h"
+#include "Time.h"
+#include "Camera.h"
+#include "InputHandler.h"
 
 // Forward Declaration
 int init(GLFWwindow* &window, const char* windowName);
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);  
 void processInput(GLFWwindow *window);
-void calcDeltaTime();
 
-const float cameraSpeed = 3; 
-
-glm::vec3 cameraPos   = glm::vec3(0.0f, 0.0f,  3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
-float deltaTime;
-float lastFrame;
+Watenk::Time watenkTime;
+Camera cam;
+InputHandler input;
 
 int main(){
 
@@ -121,22 +119,19 @@ int main(){
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
 
-        calcDeltaTime();
+        input.update(window);
+        watenkTime.update();
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color buffer
-        processInput(window);
 
         // Draw ----------------
 
-        /* Mesh */
         quadMesh.bind();
-
-        /* Shader */
         mvpShader.bind();
 
         /* Transformation matrices */
-        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        glm::mat4 view = cam.getViewMatrix();
         glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
 
         /* Textures */
@@ -194,22 +189,3 @@ int init(GLFWwindow* &window, const char* windowName){
 void framebufferSizeCallback(GLFWwindow* window, int width, int height){
     glViewport(0, 0, width, height);
 }  
-
-void processInput(GLFWwindow *window){
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed * cameraFront * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraFront * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed * deltaTime;
-}
-
-void calcDeltaTime(){
-    float currentFrame = glfwGetTime();
-    deltaTime = currentFrame - lastFrame;
-    lastFrame = currentFrame;  
-}
