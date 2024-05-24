@@ -11,9 +11,8 @@
 #include "Mesh.h"
 #include "Texture2D.h"
 #include "Time.h"
-#include "Camera.h"
 #include "InputHandler.h"
-#include "Transform.h"
+#include "PlayerController.h"
 
 // Forward Declaration
 int init(GLFWwindow* &window, const char* windowName);
@@ -21,9 +20,9 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 void printVec3(glm::vec3 vec3);
 
-Watenk::Time watenkTime;
-Camera cam(glm::vec3(0, 0, 5));
 InputHandler input;
+Watenk::Time watenkTime;
+PlayerController player(input, watenkTime);
 
 int main(){
 
@@ -108,7 +107,7 @@ int main(){
     mvpShader.bind();
 
     glm::mat4 model = glm::mat4(1.0f); // Model Matrix
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f); // Projection Matrix
+    glm::mat4 projection = player.cam.getProjectionMatrix();
     glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -118,21 +117,17 @@ int main(){
     glUniform1i(glGetUniformLocation(mvpShader.getID(), "texture1"), 0);
     glUniform1i(glGetUniformLocation(mvpShader.getID(), "texture2"), 1);
 
-    printVec3(cam.transform.getEuler());
-    cam.transform.setRotation(glm::vec3(50, 10, 10));
-    printVec3(cam.transform.getEuler());
-
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
 
         // Update Classes
         input.update(window);
         watenkTime.update();
-        glm::mat4 view = cam.getViewMatrix();
+        glm::mat4 view = player.cam.getViewMatrix();
 
         // Clear Buffers
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color buffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Draw ----------------
 

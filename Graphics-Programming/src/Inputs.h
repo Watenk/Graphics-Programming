@@ -4,5 +4,8 @@ enum EInputs {
     forwards,
     backwards,
     left,
-    right
+    right,
+    up,
+    down,
+    boost,
 };

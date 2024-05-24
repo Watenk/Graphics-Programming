@@ -6,6 +6,9 @@ void InputHandler::update(GLFWwindow* window){
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) executeCallback(EInputs::backwards);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) executeCallback(EInputs::left);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) executeCallback(EInputs::right);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) executeCallback(EInputs::up);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) executeCallback(EInputs::down);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) executeCallback(EInputs::boost);
 }
 
 void InputHandler::addInputCallBack(EInputs input, std::function<void()> callback){
