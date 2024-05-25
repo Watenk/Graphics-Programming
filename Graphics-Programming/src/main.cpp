@@ -13,22 +13,25 @@
 #include "Time.h"
 #include "InputHandler.h"
 #include "PlayerController.h"
+#include "Transform.h"
 
-// Forward Declaration
-int init(GLFWwindow* &window, const char* windowName);
+const char* WINDOWNAME = "Graphics Programming";
+
+/* Forward Declaration */
+int initGLFW(GLFWwindow* &window, const char* windowName);
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);  
-void processInput(GLFWwindow *window);
 void printVec3(glm::vec3 vec3);
 
 InputHandler input;
 Watenk::Time watenkTime;
 PlayerController player(input, watenkTime);
+Transform cubeTransform;
 
 int main(){
 
     /* GLFW Setup */
     GLFWwindow* window;
-    int initCode = init(window, "Graphics Programming");
+    int initCode = initGLFW(window, WINDOWNAME);
     if (initCode != 0) return initCode;
 
     /* Configure OpenGL */
@@ -104,11 +107,9 @@ int main(){
 
     /* Shaders */
     Shader mvpShader("res/shaders", "modelViewProjection");
+    
     mvpShader.bind();
-
-    glm::mat4 model = glm::mat4(1.0f); // Model Matrix
     glm::mat4 projection = player.cam.getProjectionMatrix();
-    glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     /* Textures */
@@ -117,15 +118,19 @@ int main(){
     glUniform1i(glGetUniformLocation(mvpShader.getID(), "texture1"), 0);
     glUniform1i(glGetUniformLocation(mvpShader.getID(), "texture2"), 1);
 
+    cubeTransform.printModelMatrix();
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
 
-        // Update Classes
+        /* Managers */
         input.update(window);
         watenkTime.update();
-        glm::mat4 view = player.cam.getViewMatrix();
 
-        // Clear Buffers
+        /* Cube */
+        //cubeTransform.move(glm::vec3(0.01f * watenkTime.getDeltaTime(), 0, 0));
+
+        /* Buffers */
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -135,6 +140,8 @@ int main(){
         mvpShader.bind();
 
         /* Transformation matrices */
+        glm::mat4 model = cubeTransform.getModelMatrix();
+        glm::mat4 view = player.cam.getViewMatrix();
         glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -158,7 +165,7 @@ int main(){
     return 0;
 }
 
-int init(GLFWwindow* &window, const char* windowName){
+int initGLFW(GLFWwindow* &window, const char* windowName){
 
     /* Init Lib */
     if (!glfwInit()) return -1;

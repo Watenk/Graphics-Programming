@@ -1,12 +1,12 @@
 #include "Camera.h"
 
 Camera::Camera(glm::vec3 pos){
-    transform.setPos(pos);
-    transform.setRotation(glm::vec3(0, 0, -90));
+    transform.position = pos;
+    transform.setEuler(glm::vec3(0, 0, -90));
 }
 
 glm::mat4 Camera::getViewMatrix(){
-    return glm::lookAt(transform.getPos(), transform.getPos() + transform.getFront(), transform.getUp());
+    return glm::lookAt(transform.position, transform.position + transform.getFront(), transform.getUp());
 }
 
 glm::mat4 Camera::getProjectionMatrix(){
