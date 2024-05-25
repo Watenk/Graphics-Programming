@@ -10,8 +10,9 @@ const float SPEED = 1.0f;
 class PlayerController{
 
 public:
-    PlayerController(InputHandler* &input, Watenk::Time* &watenkTime, float speed = SPEED, float mouseSensitivity = MOUSESENSITIVITY);
-    Camera cam;
+    PlayerController(InputHandler* &input, Watenk::Time* &watenkTime, Camera* &cam, float speed = SPEED, float mouseSensitivity = MOUSESENSITIVITY);
+    ~PlayerController();
+    Camera* cam;
 
     float mouseSensitivity;
     float speed;

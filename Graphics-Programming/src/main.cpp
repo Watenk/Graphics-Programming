@@ -15,12 +15,12 @@
 #include "PlayerController.h"
 #include "Transform.h"
 
-const char* WINDOWNAME = "Unreal";
+const char* WINDOWNAME = "Unreal Engine 6";
 const unsigned int WINDOWWIDTH = 1280;
-const unsigned int WINDOWHEIGHT = 729;
+const unsigned int WINDOWHEIGHT = 720;
 
 /* Forward Declaration */
-int initGLFW(GLFWwindow* &window, const char* windowName);
+int initGLFW(GLFWwindow* &window);
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);  
 void printVec3(glm::vec3 vec3);
 
@@ -29,11 +29,12 @@ GLFWwindow* window;
 InputHandler* input;
 Watenk::Time* watenkTime;
 PlayerController* player;
+Camera* cam;
 
 int main(){
 
     /* GLFW Setup */
-    int initCode = initGLFW(window, WINDOWNAME);
+    int initCode = initGLFW(window);
     if (initCode != 0) return initCode;
 
     /* Configure GLFW */
@@ -42,11 +43,15 @@ int main(){
     /* Configure OpenGL */
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wireframe Mode
     glEnable(GL_DEPTH_TEST); // Enable Depth Test
+    // Cull backfaces
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     /* Add Managers */
     input = new InputHandler(window);
     watenkTime = new Watenk::Time();
-    player = new PlayerController(input, watenkTime);
+    cam = new Camera(WINDOWWIDTH, WINDOWHEIGHT, POSITION, 90.0f, 0.1f, 1000.0f);
+    player = new PlayerController(input, watenkTime, cam, 5.0f);
 
     /* Mesh */
     float vertexData[] = {
@@ -120,7 +125,7 @@ int main(){
     
     mvpShader.bind();
     glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 projection = player->cam.getProjectionMatrix();
+    glm::mat4 projection = player->cam->getProjectionMatrix();
     glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     /* Textures */
@@ -146,7 +151,7 @@ int main(){
         mvpShader.bind();
 
         /* Transformation matrices */
-        glm::mat4 view = player->cam.getViewMatrix();
+        glm::mat4 view = player->cam->getViewMatrix();
         glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -173,7 +178,7 @@ int main(){
     return 0;
 }
 
-int initGLFW(GLFWwindow* &window, const char* windowName){
+int initGLFW(GLFWwindow* &window){
 
     /* Init Lib */
     if (!glfwInit()) return -1;
@@ -184,7 +189,7 @@ int initGLFW(GLFWwindow* &window, const char* windowName){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
     /* Create a windowed mode window and its OpenGL context */ 
-    window = glfwCreateWindow(WINDOWWIDTH, WINDOWHEIGHT, windowName, NULL, NULL);
+    window = glfwCreateWindow(WINDOWWIDTH, WINDOWHEIGHT, WINDOWNAME, NULL, NULL);
     if (!window){
         std::cout << "Failed to create glfw window" << std::endl;
         glfwTerminate();
