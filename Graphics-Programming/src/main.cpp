@@ -118,8 +118,6 @@ int main(){
     glUniform1i(glGetUniformLocation(mvpShader.getID(), "texture1"), 0);
     glUniform1i(glGetUniformLocation(mvpShader.getID(), "texture2"), 1);
 
-    cubeTransform.printModelMatrix();
-
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
 
@@ -128,7 +126,8 @@ int main(){
         watenkTime.update();
 
         /* Cube */
-        //cubeTransform.move(glm::vec3(0.01f * watenkTime.getDeltaTime(), 0, 0));
+        cubeTransform.rotate(glm::vec3(1.0f * watenkTime.getDeltaTime(), 0, 0));
+        std::cout << cubeTransform.getEuler().x << std::endl;
 
         /* Buffers */
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
