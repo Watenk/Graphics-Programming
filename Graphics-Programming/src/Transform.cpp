@@ -29,7 +29,7 @@ glm::vec3 Transform::getFront() const{
     glm::vec3 eulerDegrees = getEuler();
     glm::vec3 front;  
     front.x = cos(glm::radians(eulerDegrees.z)) * cos(glm::radians(eulerDegrees.y));
-    front.y = sin(glm::radians(eulerDegrees.x)) * sin(glm::radians(eulerDegrees.y));
+    front.y = sin(glm::radians(eulerDegrees.y));
     front.z = sin(glm::radians(eulerDegrees.z)) * cos(glm::radians(eulerDegrees.y));
     front = glm::normalize(front);
     return front;
