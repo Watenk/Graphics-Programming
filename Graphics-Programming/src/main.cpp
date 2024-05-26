@@ -58,26 +58,22 @@ int main(){
     Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeAttributeLenghts(), getCubeIndices());
 
     /* Shaders */
-    Shader* mvpTextureBlendShader = new Shader("res/shaders", "mvpTextureBlend");
-    Shader* mvpShader = new Shader("res/shaders", "mvp");
-
-    /* Texture2D */
-    Texture2D* crateTexture = new Texture2D("res/textures/crate.jpg", GL_RGB);
-    Texture2D* smileTexture = new Texture2D("res/textures/smile.png", GL_RGBA);
+    Shader* crateShader = new Shader("res/shaders", "mvpColor");
+    Shader* lightSourceShader = new Shader("res/shaders", "mvpColor");
 
     /* Textures */
     std::vector<Texture2D*> noTextures;
-    std::vector<Texture2D*> crateTextures;
-    crateTextures.push_back(crateTexture);
-    crateTextures.push_back(smileTexture);
 
     /* GameObjects */
-    GameObject* crate = new GameObject(cubeMesh, mvpTextureBlendShader, crateTextures, cam);
-    GameObject* lightSource = new GameObject(cubeMesh, mvpShader, noTextures, cam);
+    GameObject* crate = new GameObject(cubeMesh, crateShader, noTextures, cam);
+    GameObject* lightSource = new GameObject(cubeMesh, lightSourceShader, noTextures, cam);
 
-    /* Transforms */
-    lightSource->transform.position = glm::vec3(2, 3, 0);
+    /* Scene Data */
+    lightSource->transform.position = glm::vec3(1.2f, 1.0f, 2.0f);
     lightSource->transform.size = glm::vec3(0.2f);
+
+    crate->shader->setVec4("color", glm::vec4(1.0f, 0.5f, 0.31f, 1.0f));
+    lightSource->shader->setVec4("color", glm::vec4(1.0f));
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
