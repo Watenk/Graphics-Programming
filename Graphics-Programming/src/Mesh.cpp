@@ -2,23 +2,7 @@
 
 #include <glad/glad.h>
 
-Mesh::Mesh(const int usage, const float vertexData[], const int vertexDataSize, const int attributeAmount, const int attributeLenghts[], const int indicesAmount, const unsigned int indices[]) : indicesAmount(indicesAmount){
-
-    /* Offsets and Stride */
-    int attributeSizes[attributeAmount];
-    int attributeOffsets[attributeAmount];
-    int stride = 0;
-
-    attributeSizes[0] = sizeof(float) * attributeLenghts[0];
-    stride += attributeSizes[0];
-    attributeOffsets[0] = 0;
-    if (attributeAmount > 1){
-        for (int i = 1; i < attributeAmount; i++){
-            attributeSizes[i] = sizeof(float) * attributeLenghts[i];
-            stride += attributeSizes[i];
-            attributeOffsets[i] = attributeSizes[i - 1] + attributeOffsets[i - 1];
-        }
-    }
+Mesh::Mesh(const int usage, const std::vector<float> vertices, const std::vector<int> attributeLenghts, const std::vector<unsigned int> indices) : indicesAmount(indices.size()){
 
     /* Generate buffers */
     glGenVertexArrays(1, &VAO);
@@ -30,14 +14,31 @@ Mesh::Mesh(const int usage, const float vertexData[], const int vertexDataSize, 
 
     /* VBO */
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertexDataSize , vertexData, usage);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices.data(), usage);
 
     /* EBO */
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indicesAmount, indices, usage);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices.data(), usage);
 
     /* Vertex Attributes */
-    for (int i = 0; i < attributeAmount; i++){
+    /* Calc vertex attributes stride and offsets */
+    int attributeSizes[attributeLenghts.size()];
+    int attributeOffsets[attributeLenghts.size()];
+    int stride = 0;
+
+    attributeSizes[0] = sizeof(float) * attributeLenghts[0];
+    stride += attributeSizes[0];
+    attributeOffsets[0] = 0;
+    if (attributeLenghts.size() > 1){
+        for (int i = 1; i < attributeLenghts.size(); i++){
+            attributeSizes[i] = sizeof(float) * attributeLenghts[i];
+            stride += attributeSizes[i];
+            attributeOffsets[i] = attributeSizes[i - 1] + attributeOffsets[i - 1];
+        }
+    }
+
+    /* Set Vertex Attributes */
+    for (int i = 0; i < attributeLenghts.size(); i++){
         glVertexAttribPointer(i, attributeLenghts[i], GL_FLOAT, GL_FALSE, stride, (void*)(uintptr_t)attributeOffsets[i]);
         glEnableVertexAttribArray(i);
     }

@@ -21,6 +21,9 @@ const unsigned int WINDOWHEIGHT = 720;
 int initGLFW(GLFWwindow* &window);
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);  
 void printVec3(glm::vec3 vec3);
+std::vector<float> getCubeVertices();
+std::vector<int> getCubeAttributeLenghts();
+std::vector<unsigned int> getCubeIndices();
 
 /* Managers */
 GLFWwindow* window;
@@ -42,8 +45,8 @@ int main(){
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wireframe Mode
     glEnable(GL_DEPTH_TEST); // Enable Depth Test
     // Cull backfaces
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
 
     /* Add Managers */
     input = new InputHandler(window);
@@ -51,80 +54,30 @@ int main(){
     cam = new Camera(WINDOWWIDTH, WINDOWHEIGHT, POSITION, 90.0f, 0.1f, 1000.0f);
     player = new PlayerController(input, watenkTime, cam, 5.0f);
 
-    /* GameObjects */
-    float vertexData[] = {
-        // positions            // tex coords    // normals
-        0.5f, -0.5f, -0.5f,      1.f, 0.f,       0.f, -1.f,  0.f,
-        0.5f, -0.5f,  0.5f,      1.f, 1.f,       0.f, -1.f,  0.f,
-       -0.5f, -0.5f,  0.5f,      0.f, 1.f,       0.f, -1.f,  0.f,
-       -0.5f, -0.5f, -0.5f,      0.f, 0.f,       0.f, -1.f,  0.f,
+    /* Meshes */
+    Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeAttributeLenghts(), getCubeIndices());
 
-        0.5f,  0.5f, -0.5f,      2.f, 0.f,       1.f,  0.f,  0.f,
-        0.5f,  0.5f,  0.5f,      2.f, 1.f,       1.f,  0.f,  0.f,
-
-        0.5f,  0.5f,  0.5f,      1.f, 2.f,       0.f,  0.f,  1.f,
-       -0.5f,  0.5f,  0.5f,      0.f, 2.f,       0.f,  0.f,  1.f,
-
-       -0.5f,  0.5f,  0.5f,     -1.f, 1.f,       -1.f, 0.f,  0.f,
-       -0.5f,  0.5f, -0.5f,     -1.f, 0.f,       -1.f, 0.f,  0.f,
-
-       -0.5f,  0.5f, -0.5f,      0.f, -1.f,      0.f,  0.f, -1.f,
-        0.5f,  0.5f, -0.5f,      1.f, -1.f,      0.f,  0.f, -1.f,
-
-       -0.5f,  0.5f, -0.5f,      3.f, 0.f,       0.f,  1.f,  0.f,
-       -0.5f,  0.5f,  0.5f,      3.f, 1.f,       0.f,  1.f,  0.f,
-
-        0.5f, -0.5f,  0.5f,      1.f, 1.f,       0.f,  0.f,  1.f,
-       -0.5f, -0.5f,  0.5f,      0.f, 1.f,       0.f,  0.f,  1.f,
-
-       -0.5f, -0.5f,  0.5f,      0.f, 1.f,       -1.f, 0.f,  0.f,
-       -0.5f, -0.5f, -0.5f,      0.f, 0.f,       -1.f, 0.f,  0.f,
-
-       -0.5f, -0.5f, -0.5f,      0.f, 0.f,       0.f,  0.f, -1.f,
-        0.5f, -0.5f, -0.5f,      1.f, 0.f,       0.f,  0.f, -1.f,
-
-        0.5f, -0.5f, -0.5f,      1.f, 0.f,       1.f,  0.f,  0.f,
-        0.5f, -0.5f,  0.5f,      1.f, 1.f,       1.f,  0.f,  0.f,
-
-        0.5f,  0.5f, -0.5f,      2.f, 0.f,       0.f,  1.f,  0.f,
-        0.5f,  0.5f,  0.5f,      2.f, 1.f,       0.f,  1.f,  0.f
-    };
-
-    int attributeLenghts[] = {
-        // Pos   // UV   // Normals
-        3,       2,      3,
-    };
-
-    unsigned int indices[] = {
-        // Down
-        0, 1, 2,      // first triangle
-        0, 2, 3,      // second triangle
-        // Back
-        14, 6, 7,     // first triangle
-        14, 7, 15,    // second triangle
-        // Right
-        20, 4, 5,     // first triangle
-        20, 5, 21,    // second triangle
-        // Left
-        16, 8, 9,     // first triangle
-        16, 9, 17,    // second triangle
-        // Front
-        18, 10, 11,   // first triangle
-        18, 11, 19,   // second triangle
-        // Up
-        22, 12, 13,   // first triangle
-        22, 13, 23,   // second triangle
-    };
-
-    Mesh* crateMesh = new Mesh(GL_STATIC_DRAW, vertexData, sizeof(vertexData), sizeof(attributeLenghts) / sizeof(int), attributeLenghts, sizeof(indices) / sizeof(unsigned int), indices);
+    /* Shaders */
     Shader* mvpTextureBlendShader = new Shader("res/shaders", "mvpTextureBlend");
+    Shader* mvpShader = new Shader("res/shaders", "mvp");
+
+    /* Texture2D */
     Texture2D* crateTexture = new Texture2D("res/textures/crate.jpg", GL_RGB);
     Texture2D* smileTexture = new Texture2D("res/textures/smile.png", GL_RGBA);
+
+    /* Textures */
+    std::vector<Texture2D*> noTextures;
     std::vector<Texture2D*> crateTextures;
     crateTextures.push_back(crateTexture);
     crateTextures.push_back(smileTexture);
 
-    GameObject* crate = new GameObject(crateMesh, mvpTextureBlendShader, crateTextures, cam);
+    /* GameObjects */
+    GameObject* crate = new GameObject(cubeMesh, mvpTextureBlendShader, crateTextures, cam);
+    GameObject* lightSource = new GameObject(cubeMesh, mvpShader, noTextures, cam);
+
+    /* Transforms */
+    lightSource->transform.position = glm::vec3(2, 3, 0);
+    lightSource->transform.size = glm::vec3(0.2f);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
@@ -140,6 +93,7 @@ int main(){
         // // Draw ----------------
 
         crate->draw();
+        lightSource->draw();
 
         // Draw end -----------
 
@@ -147,15 +101,16 @@ int main(){
         glfwPollEvents(); // Windows Window Events
     }
 
-    glfwTerminate();
-
-    /* Objects */
-    delete(crate);
+    /* GameObjects */
+    delete crate ;
+    delete lightSource ;
 
     /* managers */
-    delete(input);
-    delete(watenkTime);
-    delete(player);
+    delete input;
+    delete watenkTime;
+    delete player;
+
+    glfwTerminate();
     return 0;
 }
 
@@ -198,4 +153,75 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height){
 
 void printVec3(glm::vec3 vec3){
     std::cout << "(" << vec3.x << ", " << vec3.y << ", " << vec3.z << ")" << std::endl;
+}
+
+std::vector<float> getCubeVertices(){
+    std::vector<float> cubeVertices = {
+        // positions            // tex coords    // normals
+        0.5f, -0.5f, -0.5f,      1.f, 0.f,       0.f, -1.f,  0.f,
+        0.5f, -0.5f,  0.5f,      1.f, 1.f,       0.f, -1.f,  0.f,
+       -0.5f, -0.5f,  0.5f,      0.f, 1.f,       0.f, -1.f,  0.f,
+       -0.5f, -0.5f, -0.5f,      0.f, 0.f,       0.f, -1.f,  0.f,
+
+        0.5f,  0.5f, -0.5f,      2.f, 0.f,       1.f,  0.f,  0.f,
+        0.5f,  0.5f,  0.5f,      2.f, 1.f,       1.f,  0.f,  0.f,
+        0.5f,  0.5f,  0.5f,      1.f, 2.f,       0.f,  0.f,  1.f,
+       -0.5f,  0.5f,  0.5f,      0.f, 2.f,       0.f,  0.f,  1.f,
+
+       -0.5f,  0.5f,  0.5f,     -1.f, 1.f,       -1.f, 0.f,  0.f,
+       -0.5f,  0.5f, -0.5f,     -1.f, 0.f,       -1.f, 0.f,  0.f,
+       -0.5f,  0.5f, -0.5f,      0.f, -1.f,      0.f,  0.f, -1.f,
+        0.5f,  0.5f, -0.5f,      1.f, -1.f,      0.f,  0.f, -1.f,
+
+       -0.5f,  0.5f, -0.5f,      3.f, 0.f,       0.f,  1.f,  0.f,
+       -0.5f,  0.5f,  0.5f,      3.f, 1.f,       0.f,  1.f,  0.f,
+        0.5f, -0.5f,  0.5f,      1.f, 1.f,       0.f,  0.f,  1.f,
+       -0.5f, -0.5f,  0.5f,      0.f, 1.f,       0.f,  0.f,  1.f,
+
+       -0.5f, -0.5f,  0.5f,      0.f, 1.f,       -1.f, 0.f,  0.f,
+       -0.5f, -0.5f, -0.5f,      0.f, 0.f,       -1.f, 0.f,  0.f,
+       -0.5f, -0.5f, -0.5f,      0.f, 0.f,       0.f,  0.f, -1.f,
+        0.5f, -0.5f, -0.5f,      1.f, 0.f,       0.f,  0.f, -1.f,
+
+        0.5f, -0.5f, -0.5f,      1.f, 0.f,       1.f,  0.f,  0.f,
+        0.5f, -0.5f,  0.5f,      1.f, 1.f,       1.f,  0.f,  0.f,
+        0.5f,  0.5f, -0.5f,      2.f, 0.f,       0.f,  1.f,  0.f,
+        0.5f,  0.5f,  0.5f,      2.f, 1.f,       0.f,  1.f,  0.f
+    };
+
+    return cubeVertices;
+}
+
+std::vector<int> getCubeAttributeLenghts(){
+    std::vector<int> attributeLenghts = {
+        // Pos   // UV   // Normals
+        3,       2,      3,
+    };
+
+    return attributeLenghts;
+}
+
+std::vector<unsigned int> getCubeIndices(){
+    std::vector<unsigned int> cubeIndices = {
+        // Down
+        0, 1, 2,      // first triangle
+        0, 2, 3,      // second triangle
+        // Back
+        14, 6, 7,     // first triangle
+        14, 7, 15,    // second triangle
+        // Right
+        20, 4, 5,     // first triangle
+        20, 5, 21,    // second triangle
+        // Left
+        16, 8, 9,     // first triangle
+        16, 9, 17,    // second triangle
+        // Front
+        18, 10, 11,   // first triangle
+        18, 11, 19,   // second triangle
+        // Up
+        22, 12, 13,   // first triangle
+        22, 13, 23,   // second triangle
+    };
+
+    return cubeIndices;
 }
