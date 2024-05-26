@@ -1,7 +1,6 @@
 #include "Texture2D.h"
 
 #include <iostream>
-#include <glad/glad.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -10,7 +9,7 @@ Texture2D::Texture2D(const std::string& texturePath, const int sourceFormat, con
     stbi_set_flip_vertically_on_load(true);  
 
     glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture); 
+    bind();
 
     /* Texture Wrapping */
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrappingMode);

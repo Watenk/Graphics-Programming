@@ -3,21 +3,28 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+#include "Transform.h"
 #include "Mesh.h"
 #include "Shader.h"
 #include "Texture2D.h"
+#include "Camera.h"
 
 class GameObject{
 
 public:
-    Mesh mesh;
-    Shader shader;
-    std::vector<Texture2D> textures;
+    Transform transform;
+    Mesh* mesh;
+    Shader* shader;
+    std::vector<Texture2D*> textures;
 
-    GameObject(Mesh mesh, Shader shader, std::vector<Texture2D> textures);
+    GameObject(Mesh* mesh, Shader* shader, std::vector<Texture2D*> textures, Camera* cam);
     ~GameObject();
-    void bind(glm::mat4 model, glm::mat4 view, glm::mat4 projection);
+    void draw() const;
 
 private:
+    Camera* cam;
+    GameObject();
 
+    void bind() const;
+    void bindTextures() const;
 };

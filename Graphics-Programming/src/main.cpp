@@ -116,24 +116,15 @@ int main(){
         22, 13, 23,   // second triangle
     };
 
-    Mesh crateMesh(GL_STATIC_DRAW, vertexData, sizeof(vertexData), sizeof(attributeLenghts) / sizeof(int), attributeLenghts, sizeof(indices) / sizeof(unsigned int), indices);
-
-    /* Shaders */
-    Shader mvpShader("res/shaders", "modelViewProjection");
-
-    mvpShader.bind();
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 projection = player->cam->getProjectionMatrix();
-    glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-    /* Textures */
-    Texture2D crateTexture("res/textures/crate.jpg", GL_RGB);
-    Texture2D smileTexture("res/textures/smile.png", GL_RGBA);
-    std::vector<Texture2D> crateTextures;
+    Mesh* crateMesh = new Mesh(GL_STATIC_DRAW, vertexData, sizeof(vertexData), sizeof(attributeLenghts) / sizeof(int), attributeLenghts, sizeof(indices) / sizeof(unsigned int), indices);
+    Shader* mvpTextureBlendShader = new Shader("res/shaders", "mvpTextureBlend");
+    Texture2D* crateTexture = new Texture2D("res/textures/crate.jpg", GL_RGB);
+    Texture2D* smileTexture = new Texture2D("res/textures/smile.png", GL_RGBA);
+    std::vector<Texture2D*> crateTextures;
     crateTextures.push_back(crateTexture);
     crateTextures.push_back(smileTexture);
 
-    GameObject crate(crateMesh, mvpShader, crateTextures);
+    GameObject* crate = new GameObject(crateMesh, mvpTextureBlendShader, crateTextures, cam);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
@@ -146,25 +137,9 @@ int main(){
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Draw ----------------
+        // // Draw ----------------
 
-        crateMesh.bind();
-        mvpShader.bind();
-
-        /* Transformation matrices */
-        glm::mat4 view = player->cam->getViewMatrix();
-        glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-        /* Textures */
-        glActiveTexture(GL_TEXTURE0);
-        crateTexture.bind();
-        glActiveTexture(GL_TEXTURE1);
-        smileTexture.bind();
-
-        /* DrawElement */
-        glDrawElements(GL_TRIANGLES, crateMesh.getIndicesAmount(), GL_UNSIGNED_INT, 0);
+        crate->draw();
 
         // Draw end -----------
 
@@ -173,6 +148,11 @@ int main(){
     }
 
     glfwTerminate();
+
+    /* Objects */
+    delete(crate);
+
+    /* managers */
     delete(input);
     delete(watenkTime);
     delete(player);

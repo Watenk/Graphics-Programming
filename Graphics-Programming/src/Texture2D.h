@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <glad/glad.h>
 #include <glfw/glfw3.h>
 
 const int WRAPPINGMODE = GL_REPEAT;
