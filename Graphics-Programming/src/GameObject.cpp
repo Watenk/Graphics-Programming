@@ -22,11 +22,11 @@ GameObject::GameObject(Mesh* mesh, Shader* shader, std::vector<Texture2D*> textu
 }
 
 GameObject::~GameObject(){
-    delete mesh;
-    delete shader;
-    for (Texture2D* texture : textures){
-        delete texture;
-    }
+    // delete mesh;
+    // delete shader;
+    // for (Texture2D* texture : textures){
+    //     delete texture;
+    // }
 }
 
 void GameObject::draw() const{

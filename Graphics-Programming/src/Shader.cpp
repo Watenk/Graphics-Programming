@@ -154,5 +154,7 @@ const unsigned int Shader::createShaderProgram(const unsigned int vertexShader, 
 
 unsigned int Shader::getUniformLocation(const char* name){
     bind();
-    return glGetUniformLocation(shaderProgramID, name);
+    int uniformLocation = glGetUniformLocation(shaderProgramID, name);
+    if (uniformLocation == -1) std::cerr << "Uniform " << name  << " doesn't exist in the shader program!" << std::endl;
+    return (unsigned int)uniformLocation;
 }
