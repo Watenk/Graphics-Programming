@@ -1,6 +1,5 @@
 #include "Camera.h"
 
-#include <iostream>
 
 Camera::Camera(unsigned int windowWidth, unsigned int windowHeight, glm::vec3 pos, float fov, float nearPlaneCutoff, float farPlaneCutoff) : windowWidth(windowWidth), windowHeight(windowHeight), fov(fov), nearPlaneCutoff(nearPlaneCutoff), farPlaneCutoff(farPlaneCutoff){
     transform.position = POSITION;
@@ -12,6 +11,5 @@ glm::mat4 Camera::getViewMatrix() const{
 }
 
 glm::mat4 Camera::getProjectionMatrix() const{
-    std::cout << static_cast<float>(windowWidth) << ", " << static_cast<float>(windowHeight) << std::endl;
     return glm::perspective(glm::radians(fov), static_cast<float>(windowWidth) / static_cast<float>(windowHeight), nearPlaneCutoff, farPlaneCutoff);
 }

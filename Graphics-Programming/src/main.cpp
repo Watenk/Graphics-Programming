@@ -6,14 +6,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
 
-#include "Shader.h"
-#include "Mesh.h"
-#include "Texture2D.h"
 #include "Time.h"
 #include "InputHandler.h"
 #include "PlayerController.h"
-#include "Transform.h"
+#include "GameObject.h"
 
 const char* WINDOWNAME = "Unreal Engine 6";
 const unsigned int WINDOWWIDTH = 1280;
@@ -53,7 +51,7 @@ int main(){
     cam = new Camera(WINDOWWIDTH, WINDOWHEIGHT, POSITION, 90.0f, 0.1f, 1000.0f);
     player = new PlayerController(input, watenkTime, cam, 5.0f);
 
-    /* Mesh */
+    /* GameObjects */
     float vertexData[] = {
         // positions            // tex coords    // normals
         0.5f, -0.5f, -0.5f,      1.f, 0.f,       0.f, -1.f,  0.f,
@@ -118,21 +116,24 @@ int main(){
         22, 13, 23,   // second triangle
     };
 
-    Mesh squareMesh(GL_STATIC_DRAW, vertexData, sizeof(vertexData), sizeof(attributeLenghts) / sizeof(int), attributeLenghts, sizeof(indices) / sizeof(unsigned int), indices);
+    Mesh crateMesh(GL_STATIC_DRAW, vertexData, sizeof(vertexData), sizeof(attributeLenghts) / sizeof(int), attributeLenghts, sizeof(indices) / sizeof(unsigned int), indices);
 
     /* Shaders */
     Shader mvpShader("res/shaders", "modelViewProjection");
-    
+
     mvpShader.bind();
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 projection = player->cam->getProjectionMatrix();
     glUniformMatrix4fv(glGetUniformLocation(mvpShader.getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
     /* Textures */
-    Texture2D crateTexture("res/textures/crate.jpg", GL_RGB, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
-    Texture2D smileTexture("res/textures/smile.png", GL_RGBA, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
-    glUniform1i(glGetUniformLocation(mvpShader.getID(), "texture1"), 0);
-    glUniform1i(glGetUniformLocation(mvpShader.getID(), "texture2"), 1);
+    Texture2D crateTexture("res/textures/crate.jpg", GL_RGB);
+    Texture2D smileTexture("res/textures/smile.png", GL_RGBA);
+    std::vector<Texture2D> crateTextures;
+    crateTextures.push_back(crateTexture);
+    crateTextures.push_back(smileTexture);
+
+    GameObject crate(crateMesh, mvpShader, crateTextures);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
@@ -147,7 +148,7 @@ int main(){
 
         // Draw ----------------
 
-        squareMesh.bind();
+        crateMesh.bind();
         mvpShader.bind();
 
         /* Transformation matrices */
@@ -163,7 +164,7 @@ int main(){
         smileTexture.bind();
 
         /* DrawElement */
-        glDrawElements(GL_TRIANGLES, squareMesh.getIndicesAmount(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, crateMesh.getIndicesAmount(), GL_UNSIGNED_INT, 0);
 
         // Draw end -----------
 
@@ -171,10 +172,10 @@ int main(){
         glfwPollEvents(); // Windows Window Events
     }
 
+    glfwTerminate();
     delete(input);
     delete(watenkTime);
     delete(player);
-    glfwTerminate();
     return 0;
 }
 
