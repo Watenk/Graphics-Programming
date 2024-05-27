@@ -50,8 +50,8 @@ glm::vec3 Transform::getEuler() const{
     return glm::degrees(glm::eulerAngles(rotation));
 }
 
-void Transform::setEuler(const glm::vec3& eulerDegrees){
-    rotation = glm::quat(glm::radians(eulerDegrees));
+void Transform::setEuler(const glm::vec3& eulerAnglesDegrees){
+    rotation = glm::quat(glm::radians(eulerAnglesDegrees));
 }
 
 void Transform::move(const glm::vec3& moveAmount){
@@ -62,7 +62,6 @@ void Transform::scale(const glm::vec3& scaleAmount){
     size += scaleAmount;
 }
 
-void Transform::rotate(const glm::vec3& rotateAmount){
-    glm::vec3 newRotation = getEuler() + rotateAmount;
-    setEuler(newRotation);
+void Transform::rotate(const glm::vec3& rotateEulerAngleDegrees){
+    rotation *= glm::quat(glm::radians(rotateEulerAngleDegrees));
 }

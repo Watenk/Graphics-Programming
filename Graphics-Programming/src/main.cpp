@@ -68,13 +68,15 @@ int main(){
     GameObject* crate = new GameObject(cubeMesh, crateShader, noTextures, cam);
     GameObject* lightSource = new GameObject(cubeMesh, lightSourceShader, noTextures, cam);
 
-    /* Scene Data */
+    /* Scene Positions */
     lightSource->transform.position = glm::vec3(1.2f, 1.0f, 2.0f);
     lightSource->transform.size = glm::vec3(0.2f);
 
+    /* Scene Uniforms */
     lightSource->shader->setVec4("color", glm::vec4(1.0f));
     crate->shader->setVec3("lightColor", glm::vec4(1.0f));
     crate->shader->setVec3("objectColor", glm::vec4(1.0f, 0.5f, 0.31f, 1.0f));
+    crate->shader->setVec3("lightPos", lightSource->transform.position);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
@@ -82,6 +84,9 @@ int main(){
         /* Managers */
         input->update(window);
         watenkTime->update();
+
+        /* GameObject Updates */
+        crate->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
 
         /* Buffers */
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
