@@ -73,9 +73,12 @@ int main(){
     lightSource->transform.size = glm::vec3(0.2f);
 
     /* Scene Uniforms */
-    lightSource->shader->setVec4("color", glm::vec4(1.0f));
-    crate->shader->setVec3("lightColor", glm::vec4(1.0f));
-    crate->shader->setVec3("objectColor", glm::vec4(1.0f, 0.5f, 0.31f, 1.0f));
+    glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    glm::vec3 crateColor = glm::vec3(1.0f, 0.5f, 0.31f);
+
+    lightSource->shader->setVec4("color", glm::vec4(lightColor.x, lightColor.y, lightColor.z, 1.0f));
+    crate->shader->setVec3("lightColor", lightColor);
+    crate->shader->setVec3("objectColor", crateColor);
     crate->shader->setVec3("lightPos", lightSource->transform.position);
 
     /* Loop until the user closes the window */
@@ -87,6 +90,9 @@ int main(){
 
         /* GameObject Updates */
         crate->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
+
+        /* Uniform Updates */
+        crate->shader->setVec3("camPos", cam->transform.position);
 
         /* Buffers */
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
