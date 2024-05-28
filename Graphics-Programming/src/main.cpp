@@ -64,8 +64,14 @@ int main(){
     /* Textures */
     std::vector<Texture2D*> noTextures;
 
+    std::vector<Texture2D*> crateTextures;
+    Texture2D* container = new Texture2D("res/textures/container.png", GL_RGBA);
+    Texture2D* containerSpecular = new Texture2D("res/textures/containerSpecular.png", GL_RGBA);
+    crateTextures.push_back(container);
+    crateTextures.push_back(containerSpecular);
+
     /* GameObjects */
-    GameObject* crate = new GameObject(cubeMesh, crateShader, noTextures, cam);
+    GameObject* crate = new GameObject(cubeMesh, crateShader, crateTextures, cam);
     GameObject* lightSource = new GameObject(cubeMesh, lightSourceShader, noTextures, cam);
 
     /* Scene Positions */
@@ -73,25 +79,21 @@ int main(){
     lightSource->transform.size = glm::vec3(0.2f);
 
     /* Scene Settings */
-    glm::vec3 lightColor = glm::vec3(1.0f, 0.0f, 1.0f);
-    glm::vec3 crateColor = glm::vec3(1.0f, 0.5f, 0.31f);
+    glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
     /* Color uniforms */
     lightSource->shader->setVec4("color", glm::vec4(lightColor.x, lightColor.y, lightColor.z, 1.0f));
 
     /* Light uniforms */
-    glm::vec3 lightDiffuseStrenght = lightColor * glm::vec3(0.5f);
-    glm::vec3 lightAmbientStrenght = lightDiffuseStrenght * glm::vec3(0.2f);
     crate->shader->setVec3("light.position", lightSource->transform.position);
-    crate->shader->setVec3("light.ambientStrenght", lightAmbientStrenght);
-    crate->shader->setVec3("light.diffuseStrenght", lightDiffuseStrenght);
+    crate->shader->setVec3("light.ambientStrenght", glm::vec3(0.2f, 0.2f, 0.2f));
+    crate->shader->setVec3("light.diffuseStrenght", glm::vec3(0.5f, 0.5f, 0.5f));
     crate->shader->setVec3("light.specularStrenght", glm::vec3(1.0f)); 
 
     /* Material uniforms */
-    crate->shader->setVec3("material.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
-    crate->shader->setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-    crate->shader->setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-    crate->shader->setFloat("material.shininess", 32.0f);
+    crate->shader->setInt("material.diffuseTexture", 0);
+    crate->shader->setInt("material.specularTexture", 1);
+    crate->shader->setFloat("material.shininess", 64.0f);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
@@ -104,7 +106,7 @@ int main(){
         crate->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
 
         /* Uniform Updates */
-        crate->shader->setVec3("camPos", cam->transform.position);
+        crate->shader->setVec3("viewPos", cam->transform.position);
 
         /* Buffers */
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
