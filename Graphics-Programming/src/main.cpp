@@ -72,14 +72,26 @@ int main(){
     lightSource->transform.position = glm::vec3(1.2f, 1.0f, 2.0f);
     lightSource->transform.size = glm::vec3(0.2f);
 
-    /* Scene Uniforms */
-    glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    /* Scene Settings */
+    glm::vec3 lightColor = glm::vec3(1.0f, 0.0f, 1.0f);
     glm::vec3 crateColor = glm::vec3(1.0f, 0.5f, 0.31f);
 
+    /* Color uniforms */
     lightSource->shader->setVec4("color", glm::vec4(lightColor.x, lightColor.y, lightColor.z, 1.0f));
-    crate->shader->setVec3("lightColor", lightColor);
-    crate->shader->setVec3("objectColor", crateColor);
-    crate->shader->setVec3("lightPos", lightSource->transform.position);
+
+    /* Light uniforms */
+    glm::vec3 lightDiffuseStrenght = lightColor * glm::vec3(0.5f);
+    glm::vec3 lightAmbientStrenght = lightDiffuseStrenght * glm::vec3(0.2f);
+    crate->shader->setVec3("light.position", lightSource->transform.position);
+    crate->shader->setVec3("light.ambientStrenght", lightAmbientStrenght);
+    crate->shader->setVec3("light.diffuseStrenght", lightDiffuseStrenght);
+    crate->shader->setVec3("light.specularStrenght", glm::vec3(1.0f)); 
+
+    /* Material uniforms */
+    crate->shader->setVec3("material.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
+    crate->shader->setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+    crate->shader->setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+    crate->shader->setFloat("material.shininess", 32.0f);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
