@@ -12,6 +12,9 @@
 #include "InputHandler.h"
 #include "PlayerController.h"
 #include "GameObject.h"
+#include "lights/DirectionalLight.h"
+#include "lights/PointLight.h"
+#include "lights/SpotLight.h"
 
 const char* WINDOWNAME = "Unreal Engine 6";
 const unsigned int WINDOWWIDTH = 1280;
@@ -58,8 +61,8 @@ int main(){
     Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeAttributeLenghts(), getCubeIndices());
 
     /* Shaders */
-    Shader* crateShader = new Shader("res/shaders", "phongMvp");
-    Shader* lightSourceShader = new Shader("res/shaders", "ColorMvp");
+    Shader* crateShader = new Shader("res/shaders", "lightsPhongMvp");
+    Shader* lightSourceShader = new Shader("res/shaders", "colorMvp");
 
     /* Textures */
     std::vector<Texture2D*> noTextures;

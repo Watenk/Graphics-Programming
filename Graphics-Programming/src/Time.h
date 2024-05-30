@@ -1,12 +1,10 @@
 #pragma once
 
-#include "Interfaces/IUpdateable.h"
-
 namespace Watenk{
-class Time : public IUpdateable{
+class Time{
 
 public:
-    void update() override;
+    void update();
     float getDeltaTime();
     float getLastFrame();
 
