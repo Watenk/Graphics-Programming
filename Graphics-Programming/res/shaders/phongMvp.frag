@@ -7,6 +7,11 @@ struct Light {
     vec3 ambientStrenght;
     vec3 diffuseStrenght;
     vec3 specularStrenght;
+
+    // Attenuation
+    float constant;
+    float linear;
+    float quadratic;
 };
 
 struct Material {
@@ -24,6 +29,7 @@ uniform Material material;
 uniform Light light;  
 
 void main(){
+
     // Ambient Lighting (constant small amount of light)
     vec3 ambientColor = light.ambientStrenght * texture(material.diffuseTexture, texCoord).rgb; // Read texture uv and multiply it with light.ambientStrenght
 
@@ -38,6 +44,14 @@ void main(){
     vec3 reflectDir = reflect(-lightDir, norm);
     float specularIntensity = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specularColor = light.specularStrenght * specularIntensity * texture(material.specularTexture, texCoord).rgb; // Read texture uv and multiply it with light.specularStrenght and diffuseIntensity
+
+    // Attenuation
+    float distance = length(light.position - fragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));   
+
+    ambientColor *= attenuation; 
+    diffuseColor *= attenuation;
+    specularColor *= attenuation;   
 
     // Final Color
     vec3 finalColor = ambientColor + diffuseColor + specularColor;

@@ -89,6 +89,9 @@ int main(){
     crate->shader->setVec3("light.ambientStrenght", glm::vec3(0.2f, 0.2f, 0.2f));
     crate->shader->setVec3("light.diffuseStrenght", glm::vec3(0.5f, 0.5f, 0.5f));
     crate->shader->setVec3("light.specularStrenght", glm::vec3(1.0f)); 
+    crate->shader->setFloat("light.constant", 1.0f);
+    crate->shader->setFloat("light.linear", 0.09f);
+    crate->shader->setFloat("light.quadratic", 0.032f);	
 
     /* Material uniforms */
     crate->shader->setInt("material.diffuseTexture", 0);
