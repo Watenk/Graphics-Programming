@@ -12,9 +12,7 @@
 #include "InputHandler.h"
 #include "PlayerController.h"
 #include "GameObject.h"
-#include "lights/DirectionalLight.h"
-#include "lights/PointLight.h"
-#include "lights/SpotLight.h"
+#include "lights.h"
 
 const char* WINDOWNAME = "Unreal Engine 6";
 const unsigned int WINDOWWIDTH = 1280;
@@ -34,6 +32,7 @@ InputHandler* input;
 Watenk::Time* watenkTime;
 PlayerController* player;
 Camera* cam;
+Lights* lights;
 
 int main(){
 
@@ -56,6 +55,7 @@ int main(){
     watenkTime = new Watenk::Time();
     cam = new Camera(WINDOWWIDTH, WINDOWHEIGHT, POSITION, 90.0f, 0.1f, 1000.0f);
     player = new PlayerController(input, watenkTime, cam, 5.0f);
+    lights = new Lights();
 
     /* Meshes */
     Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeAttributeLenghts(), getCubeIndices());
@@ -88,13 +88,7 @@ int main(){
     lightSource->shader->setVec4("color", glm::vec4(lightColor.x, lightColor.y, lightColor.z, 1.0f));
 
     /* Light uniforms */
-    crate->shader->setVec3("light.position", lightSource->transform.position);
-    crate->shader->setVec3("light.ambientStrenght", glm::vec3(0.2f, 0.2f, 0.2f));
-    crate->shader->setVec3("light.diffuseStrenght", glm::vec3(0.5f, 0.5f, 0.5f));
-    crate->shader->setVec3("light.specularStrenght", glm::vec3(1.0f)); 
-    crate->shader->setFloat("light.constant", 1.0f);
-    crate->shader->setFloat("light.linear", 0.09f);
-    crate->shader->setFloat("light.quadratic", 0.032f);	
+    lights->addShader(crateShader);
 
     /* Material uniforms */
     crate->shader->setInt("material.diffuseTexture", 0);
@@ -123,7 +117,7 @@ int main(){
         crate->draw();
         lightSource->draw();
 
-        // Draw end -----------
+        // Draw end -----------a
 
         glfwSwapBuffers(window);
         glfwPollEvents(); // Windows Window Events

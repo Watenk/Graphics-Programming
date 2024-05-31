@@ -3,6 +3,9 @@
 #include <GLFW/glfw3.h>
 
 namespace Watenk{
+
+Time::~Time() {}
+
 void Time::update(){
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;

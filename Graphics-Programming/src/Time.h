@@ -4,6 +4,8 @@ namespace Watenk{
 class Time{
 
 public:
+    ~Time();
+
     void update();
     float getDeltaTime();
     float getLastFrame();
