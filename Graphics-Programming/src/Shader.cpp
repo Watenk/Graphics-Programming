@@ -101,6 +101,10 @@ void Shader::setUIntArray(const char* name, std::vector<unsigned int> data){
     glUniform1uiv(getUniformLocation(name), data.size(), data.data());
 }
 
+void Shader::setMatrix4(const char* name, glm::mat4 data){
+    glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(data));
+}
+
 // Private
 
 const unsigned int Shader::compileShader(const unsigned int type, const std::string& source){

@@ -1,10 +1,11 @@
 #include "Mesh.h"
 
 #include <glad/glad.h>
+#include <iostream>
 
-Mesh::Mesh(const int usage, const std::vector<float> vertices, const std::vector<int> attributeLenghts, const std::vector<unsigned int> indices) : indicesAmount(indices.size()){
+Mesh::Mesh(const int usage, const std::vector<float> vertices, const std::vector<unsigned int> indices, const std::vector<Texture2D*> textures, const std::vector<int> attributes, Shader* shader) : vertices(vertices), indices(indices), textures(textures){
 
-    /* Generate buffers */
+    /* Generate Buffers */
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -22,28 +23,78 @@ Mesh::Mesh(const int usage, const std::vector<float> vertices, const std::vector
 
     /* Vertex Attributes */
     /* Calc vertex attributes stride and offsets */
-    int attributeSizes[attributeLenghts.size()];
-    int attributeOffsets[attributeLenghts.size()];
+    int attributeSizes[attributes.size()];
+    int attributeOffsets[attributes.size()];
     int stride = 0;
 
-    attributeSizes[0] = sizeof(float) * attributeLenghts[0];
+    attributeSizes[0] = sizeof(float) * attributes[0];
     stride += attributeSizes[0];
     attributeOffsets[0] = 0;
-    if (attributeLenghts.size() > 1){
-        for (int i = 1; i < attributeLenghts.size(); i++){
-            attributeSizes[i] = sizeof(float) * attributeLenghts[i];
+    if (attributes.size() > 1){
+        for (int i = 1; i < attributes.size(); i++){
+            attributeSizes[i] = sizeof(float) * attributes[i];
             stride += attributeSizes[i];
             attributeOffsets[i] = attributeSizes[i - 1] + attributeOffsets[i - 1];
         }
     }
 
     /* Set Vertex Attributes */
-    for (int i = 0; i < attributeLenghts.size(); i++){
-        glVertexAttribPointer(i, attributeLenghts[i], GL_FLOAT, GL_FALSE, stride, (void*)(uintptr_t)attributeOffsets[i]);
+    for (int i = 0; i < attributes.size(); i++){
+        glVertexAttribPointer(i, attributes[i], GL_FLOAT, GL_FALSE, stride, (void*)(uintptr_t)attributeOffsets[i]);
         glEnableVertexAttribArray(i);
     }
 
-    /* Cleanup */
+    changeShader(shader);
+}
+
+Mesh::~Mesh(){
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+
+    for (Texture2D* texture : textures){
+        delete texture;
+    }
+}
+
+void Mesh::draw() const{
+    shader->bind();
+    bind();
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+}
+
+void Mesh::changeShader(Shader* _shader){
+    shader = _shader;
+
+    /* Shader Texture Uniforms */
+    int diffuseIndex = 0;
+    int specularIndex = 0;
+    for (Texture2D* texture : textures){
+        texture->bind();
+        if (texture->type == TextureType::diffuse){
+            std::string textureName = std::to_string(texture->type) + std::to_string(diffuseIndex);
+            glUniform1i(glGetUniformLocation(shader->getID(), textureName.c_str()), diffuseIndex);
+            diffuseIndex++;
+        }
+        else if (texture->type == TextureType::specular){
+            std::string textureName = std::to_string(texture->type) + std::to_string(specularIndex);
+            glUniform1i(glGetUniformLocation(shader->getID(), textureName.c_str()), specularIndex);
+            specularIndex++;
+        }
+    }
+}
+
+void Mesh::bind() const{
+    glBindVertexArray(VAO);
+
+    /* Textures */
+    for (int i = 0; i < textures.size(); i++){
+        glActiveTexture(GL_TEXTURE0 + i);
+        textures[i]->bind();
+    }
+}
+
+void Mesh::unBind() const{
     /* note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind */
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Clears the VBO
 
@@ -53,19 +104,4 @@ Mesh::Mesh(const int usage, const std::vector<float> vertices, const std::vector
 
     // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Clears the EBO
-}
-
-Mesh::~Mesh(){
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-}
-
-const int Mesh::getIndicesAmount() const{
-    return indicesAmount;
-}
-
-// private
-void Mesh::bind() const{
-    glBindVertexArray(VAO);
 }

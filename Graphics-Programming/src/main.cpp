@@ -11,7 +11,7 @@
 #include "Time.h"
 #include "InputHandler.h"
 #include "PlayerController.h"
-#include "GameObject.h"
+#include "Model.h"
 #include "lights.h"
 
 const char* WINDOWNAME = "Unreal Engine 6";
@@ -44,7 +44,7 @@ int main(){
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
 
     /* Configure OpenGL */
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wireframe Mode
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wireframe Mode
     glEnable(GL_DEPTH_TEST); // Enable Depth Test
     // Cull backfaces
     //glEnable(GL_CULL_FACE);
@@ -57,37 +57,24 @@ int main(){
     player = new PlayerController(input, watenkTime, cam, 5.0f);
     lights = new Lights();
 
-    /* Meshes */
-    Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeAttributeLenghts(), getCubeIndices());
-
     /* Shaders */
     Shader* crateShader = new Shader("res/shaders", "lightsPhongMvp");
-    Shader* lightSourceShader = new Shader("res/shaders", "colorMvp");
 
     /* Textures */
     std::vector<Texture2D*> noTextures;
 
     std::vector<Texture2D*> crateTextures;
-    Texture2D* container = new Texture2D("res/textures/container.png", GL_RGBA);
-    Texture2D* containerSpecular = new Texture2D("res/textures/containerSpecular.png", GL_RGBA);
+    Texture2D* container = new Texture2D("res/textures/container.png", GL_RGBA, TextureType::diffuse);
+    Texture2D* containerSpecular = new Texture2D("res/textures/containerSpecular.png", GL_RGBA, TextureType::specular);
     crateTextures.push_back(container);
     crateTextures.push_back(containerSpecular);
 
-    /* GameObjects */
-    GameObject* crate = new GameObject(cubeMesh, crateShader, crateTextures, cam);
-    GameObject* lightSource = new GameObject(cubeMesh, lightSourceShader, noTextures, cam);
+    /* Meshes */
+    Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices(), crateTextures, getCubeAttributeLenghts(), crateShader);
 
-    /* Scene Positions */
-    lightSource->transform.position = glm::vec3(1.2f, 1.0f, 2.0f);
-    lightSource->transform.size = glm::vec3(0.2f);
+    Model* crate = new Model(cubeMesh, crateShader, cam);
 
-    /* Scene Settings */
-    glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-
-    /* Color uniforms */
-    lightSource->shader->setVec4("color", glm::vec4(lightColor.x, lightColor.y, lightColor.z, 1.0f));
-
-    /* Light uniforms */
+    /* Lights */
     lights->addShader(crateShader);
 
     /* Material uniforms */
@@ -106,26 +93,21 @@ int main(){
         crate->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
 
         /* Uniform Updates */
-        crate->shader->setVec3("viewPos", cam->transform.position);
+        crateShader->setVec3("viewPos", cam->transform.position);
 
         /* Buffers */
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // // Draw ----------------
-
+        
         crate->draw();
-        lightSource->draw();
 
         // Draw end -----------a
 
         glfwSwapBuffers(window);
         glfwPollEvents(); // Windows Window Events
     }
-
-    /* GameObjects */
-    delete crate ;
-    delete lightSource ;
 
     /* managers */
     delete input;

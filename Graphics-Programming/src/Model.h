@@ -9,22 +9,21 @@
 #include "Texture2D.h"
 #include "Camera.h"
 
-class GameObject{
+class Model{
 
 public:
     Transform transform;
     Mesh* mesh;
     Shader* shader;
-    std::vector<Texture2D*> textures;
 
-    GameObject(Mesh* mesh, Shader* shader, std::vector<Texture2D*> textures, Camera* cam);
-    ~GameObject();
+    Model(Mesh* mesh, Shader* shader, Camera* cam);
+    ~Model();
+
     void draw() const;
 
 private:
     Camera* cam;
-    GameObject();
 
     void bind() const;
-    void bindTextures() const;
+    void unBind() const;
 };

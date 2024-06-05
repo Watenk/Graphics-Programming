@@ -5,6 +5,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 
+#include "Camera.h"
+#include "Transform.h"
+
 class Shader{
 public:
     /**
@@ -17,6 +20,7 @@ public:
     /* Binds this shader program as the current shader program of OpenGL */
     void bind() const;
     unsigned int getID() const;
+    
     void setVec4(const char* name, const glm::vec4 data);
     void setVec3(const char* name, const glm::vec3 data);
     void setVec2(const char* name, const glm::vec2 data);
@@ -30,6 +34,8 @@ public:
     void setFloatArray(const char* name, std::vector<float> data);
     void setIntArray(const char* name, std::vector<int> data);
     void setUIntArray(const char* name, std::vector<unsigned int> data);
+
+    void setMatrix4(const char* name, glm::mat4 data);
 
 private:
     unsigned int shaderProgramID;
