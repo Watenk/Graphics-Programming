@@ -3,7 +3,8 @@
 #include <glad/glad.h>
 #include <iostream>
 
-Mesh::Mesh(const int usage, const std::vector<float> vertices, const std::vector<unsigned int> indices, const std::vector<Texture2D*> textures, const std::vector<int> attributes, Shader* shader) : vertices(vertices), indices(indices), textures(textures){
+Mesh::Mesh(const int usage, const std::vector<float> vertices, const std::vector<unsigned int> indices, const std::vector<Texture2D*> textures, const Camera* cam, const std::vector<int> attributes) 
+          : vertices(vertices), indices(indices), textures(textures), cam(cam){
 
     /* Generate Buffers */
     glGenVertexArrays(1, &VAO);
@@ -43,8 +44,6 @@ Mesh::Mesh(const int usage, const std::vector<float> vertices, const std::vector
         glVertexAttribPointer(i, attributes[i], GL_FLOAT, GL_FALSE, stride, (void*)(uintptr_t)attributeOffsets[i]);
         glEnableVertexAttribArray(i);
     }
-
-    changeShader(shader);
 }
 
 Mesh::~Mesh(){
@@ -57,14 +56,19 @@ Mesh::~Mesh(){
     }
 }
 
-void Mesh::draw() const{
-    shader->bind();
+void Mesh::draw(Shader* shader) const{
     bind();
+    updateShaderUniforms(shader);
+
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 }
 
-void Mesh::changeShader(Shader* _shader){
-    shader = _shader;
+void Mesh::updateShaderUniforms(Shader* shader) const{
+
+    /* Shader MVP Uniforms */
+    shader->setMatrix4("model", transform.getModelMatrix());
+    shader->setMatrix4("view", cam->getViewMatrix());
+    shader->setMatrix4("projection", cam->getProjectionMatrix());
 
     /* Shader Texture Uniforms */
     int diffuseIndex = 0;
@@ -94,14 +98,14 @@ void Mesh::bind() const{
     }
 }
 
-void Mesh::unBind() const{
-    /* note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind */
-    glBindBuffer(GL_ARRAY_BUFFER, 0); // Clears the VBO
+// void Mesh::unBind() const{
+//     /* note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind */
+//     glBindBuffer(GL_ARRAY_BUFFER, 0); // Clears the VBO
 
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    glBindVertexArray(0); // Clears the VAO
+//     // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
+//     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
+//     glBindVertexArray(0); // Clears the VAO
 
-    // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Clears the EBO
-}
+//     // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
+//     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Clears the EBO
+// }

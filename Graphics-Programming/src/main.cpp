@@ -59,28 +59,31 @@ int main(){
 
     /* Shaders */
     Shader* crateShader = new Shader("res/shaders", "lightsPhongMvp");
+    Shader* backpackShader = new Shader("res/shaders", "lightsPhongMvp");
 
     /* Textures */
     std::vector<Texture2D*> noTextures;
 
     std::vector<Texture2D*> crateTextures;
-    Texture2D* container = new Texture2D("res/textures/container.png", GL_RGBA, TextureType::diffuse);
-    Texture2D* containerSpecular = new Texture2D("res/textures/containerSpecular.png", GL_RGBA, TextureType::specular);
+    Texture2D* container = new Texture2D("res/textures/container.png", TextureType::diffuse);
+    Texture2D* containerSpecular = new Texture2D("res/textures/containerSpecular.png", TextureType::specular);
     crateTextures.push_back(container);
     crateTextures.push_back(containerSpecular);
 
     /* Meshes */
-    Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices(), crateTextures, getCubeAttributeLenghts(), crateShader);
+    Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices(), crateTextures, cam);
 
-    Model* crate = new Model(cubeMesh, crateShader, cam);
+    /* Models */
+    Model* backpack = new Model(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", cam);
 
     /* Lights */
     lights->addShader(crateShader);
+    lights->addShader(backpackShader);
 
     /* Material uniforms */
-    crate->shader->setInt("material.diffuseTexture", 0);
-    crate->shader->setInt("material.specularTexture", 1);
-    crate->shader->setFloat("material.shininess", 64.0f);
+    crateShader->setInt("material.diffuseTexture", 0);
+    crateShader->setInt("material.specularTexture", 1);
+    crateShader->setFloat("material.shininess", 64.0f);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
@@ -90,7 +93,7 @@ int main(){
         watenkTime->update();
 
         /* GameObject Updates */
-        crate->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
+        cubeMesh->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
 
         /* Uniform Updates */
         crateShader->setVec3("viewPos", cam->transform.position);
@@ -101,7 +104,8 @@ int main(){
 
         // // Draw ----------------
         
-        crate->draw();
+        cubeMesh->draw(crateShader);
+        backpack->draw(backpackShader);
 
         // Draw end -----------a
 
@@ -161,48 +165,39 @@ void printVec3(glm::vec3 vec3){
 
 std::vector<float> getCubeVertices(){
     std::vector<float> cubeVertices = {
-        // positions            // tex coords    // normals
-        0.5f, -0.5f, -0.5f,      1.f, 0.f,       0.f, -1.f,  0.f,
-        0.5f, -0.5f,  0.5f,      1.f, 1.f,       0.f, -1.f,  0.f,
-       -0.5f, -0.5f,  0.5f,      0.f, 1.f,       0.f, -1.f,  0.f,
-       -0.5f, -0.5f, -0.5f,      0.f, 0.f,       0.f, -1.f,  0.f,
+        // positions              // normals             // tex coords  
+        0.5f, -0.5f, -0.5f,       0.f, -1.f,  0.f,       1.f, 0.f,     
+        0.5f, -0.5f,  0.5f,       0.f, -1.f,  0.f,       1.f, 1.f,     
+       -0.5f, -0.5f,  0.5f,       0.f, -1.f,  0.f,       0.f, 1.f,     
+       -0.5f, -0.5f, -0.5f,       0.f, -1.f,  0.f,       0.f, 0.f,     
 
-        0.5f,  0.5f, -0.5f,      2.f, 0.f,       1.f,  0.f,  0.f,
-        0.5f,  0.5f,  0.5f,      2.f, 1.f,       1.f,  0.f,  0.f,
-        0.5f,  0.5f,  0.5f,      1.f, 2.f,       0.f,  0.f,  1.f,
-       -0.5f,  0.5f,  0.5f,      0.f, 2.f,       0.f,  0.f,  1.f,
+        0.5f,  0.5f, -0.5f,       1.f,  0.f,  0.f,       2.f, 0.f,     
+        0.5f,  0.5f,  0.5f,       1.f,  0.f,  0.f,       2.f, 1.f,     
+        0.5f,  0.5f,  0.5f,       0.f,  0.f,  1.f,       1.f, 2.f,     
+       -0.5f,  0.5f,  0.5f,       0.f,  0.f,  1.f,       0.f, 2.f,     
 
-       -0.5f,  0.5f,  0.5f,     -1.f, 1.f,       -1.f, 0.f,  0.f,
-       -0.5f,  0.5f, -0.5f,     -1.f, 0.f,       -1.f, 0.f,  0.f,
-       -0.5f,  0.5f, -0.5f,      0.f, -1.f,      0.f,  0.f, -1.f,
-        0.5f,  0.5f, -0.5f,      1.f, -1.f,      0.f,  0.f, -1.f,
+       -0.5f,  0.5f,  0.5f,       -1.f, 0.f,  0.f,      -1.f, 1.f,     
+       -0.5f,  0.5f, -0.5f,       -1.f, 0.f,  0.f,      -1.f, 0.f,     
+       -0.5f,  0.5f, -0.5f,       0.f,  0.f, -1.f,       0.f, -1.f,    
+        0.5f,  0.5f, -0.5f,       0.f,  0.f, -1.f,       1.f, -1.f,    
 
-       -0.5f,  0.5f, -0.5f,      3.f, 0.f,       0.f,  1.f,  0.f,
-       -0.5f,  0.5f,  0.5f,      3.f, 1.f,       0.f,  1.f,  0.f,
-        0.5f, -0.5f,  0.5f,      1.f, 1.f,       0.f,  0.f,  1.f,
-       -0.5f, -0.5f,  0.5f,      0.f, 1.f,       0.f,  0.f,  1.f,
+       -0.5f,  0.5f, -0.5f,       0.f,  1.f,  0.f,       3.f, 0.f,     
+       -0.5f,  0.5f,  0.5f,       0.f,  1.f,  0.f,       3.f, 1.f,     
+        0.5f, -0.5f,  0.5f,       0.f,  0.f,  1.f,       1.f, 1.f,     
+       -0.5f, -0.5f,  0.5f,       0.f,  0.f,  1.f,       0.f, 1.f,     
 
-       -0.5f, -0.5f,  0.5f,      0.f, 1.f,       -1.f, 0.f,  0.f,
-       -0.5f, -0.5f, -0.5f,      0.f, 0.f,       -1.f, 0.f,  0.f,
-       -0.5f, -0.5f, -0.5f,      0.f, 0.f,       0.f,  0.f, -1.f,
-        0.5f, -0.5f, -0.5f,      1.f, 0.f,       0.f,  0.f, -1.f,
+       -0.5f, -0.5f,  0.5f,       -1.f, 0.f,  0.f,       0.f, 1.f,     
+       -0.5f, -0.5f, -0.5f,       -1.f, 0.f,  0.f,       0.f, 0.f,     
+       -0.5f, -0.5f, -0.5f,       0.f,  0.f, -1.f,       0.f, 0.f,     
+        0.5f, -0.5f, -0.5f,       0.f,  0.f, -1.f,       1.f, 0.f,     
 
-        0.5f, -0.5f, -0.5f,      1.f, 0.f,       1.f,  0.f,  0.f,
-        0.5f, -0.5f,  0.5f,      1.f, 1.f,       1.f,  0.f,  0.f,
-        0.5f,  0.5f, -0.5f,      2.f, 0.f,       0.f,  1.f,  0.f,
-        0.5f,  0.5f,  0.5f,      2.f, 1.f,       0.f,  1.f,  0.f
+        0.5f, -0.5f, -0.5f,       1.f,  0.f,  0.f,       1.f, 0.f,     
+        0.5f, -0.5f,  0.5f,       1.f,  0.f,  0.f,       1.f, 1.f,     
+        0.5f,  0.5f, -0.5f,       0.f,  1.f,  0.f,       2.f, 0.f,     
+        0.5f,  0.5f,  0.5f,       0.f,  1.f,  0.f,       2.f, 1.f,     
     };
 
     return cubeVertices;
-}
-
-std::vector<int> getCubeAttributeLenghts(){
-    std::vector<int> attributeLenghts = {
-        // Pos   // UV   // Normals
-        3,       2,      3,
-    };
-
-    return attributeLenghts;
 }
 
 std::vector<unsigned int> getCubeIndices(){

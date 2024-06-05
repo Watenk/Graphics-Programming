@@ -4,7 +4,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-Texture2D::Texture2D(const std::string& texturePath, const int sourceFormat, const TextureType type, const int wrappingMode, const int minimizeFilterMode, const int magnifyFilterMode) : type(type){
+Texture2D::Texture2D(const std::string& texturePath, TextureType type, const int wrappingMode, const int minimizeFilterMode, const int magnifyFilterMode) : type(type), texturePath(texturePath){
 
     stbi_set_flip_vertically_on_load(true);  
 
@@ -23,7 +23,15 @@ Texture2D::Texture2D(const std::string& texturePath, const int sourceFormat, con
     int width, height, nrChannels;
     unsigned char *data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
     if (data){
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, sourceFormat, GL_UNSIGNED_BYTE, data);
+        GLenum format;
+        if (nrChannels == 1)
+            format = GL_RED;
+        else if (nrChannels == 3)
+            format = GL_RGB;
+        else if (nrChannels == 4)
+            format = GL_RGBA;
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else{
