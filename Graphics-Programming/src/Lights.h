@@ -10,7 +10,7 @@ struct PhongLight{
     glm::vec3 diffuse;    
     glm::vec3 specular;
 
-    PhongLight(glm::vec3 ambient = glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3 diffuse = glm::vec3(1.0f), glm::vec3 specular = glm::vec3(1.0f)) : ambient(ambient), diffuse(diffuse), specular(specular) {}
+    PhongLight(glm::vec3 ambient = glm::vec3(0.2f), glm::vec3 diffuse = glm::vec3(1.0f), glm::vec3 specular = glm::vec3(1.0f)) : ambient(ambient), diffuse(diffuse), specular(specular) {}
 };
 
 struct DirectionalLight{

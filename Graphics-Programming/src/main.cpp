@@ -85,6 +85,16 @@ int main(){
     crateShader->setInt("material.specularTexture", 1);
     crateShader->setFloat("material.shininess", 64.0f);
 
+    backpackShader->setInt("material.diffuseTexture", 0);
+    backpackShader->setInt("material.specularTexture", 1);
+    backpackShader->setFloat("material.shininess", 64.0f);
+
+    for (Mesh* mesh : backpack->meshes){
+        mesh->transform.move(glm::vec3(10, 0, 0));
+    }
+
+    std::cout << backpack->meshes[0]->textures[1]->texturePath << std::endl;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
 
@@ -93,16 +103,17 @@ int main(){
         watenkTime->update();
 
         /* GameObject Updates */
-        cubeMesh->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
+        //cubeMesh->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
 
         /* Uniform Updates */
         crateShader->setVec3("viewPos", cam->transform.position);
+        backpackShader->setVec3("viewPos", cam->transform.position);
 
         /* Buffers */
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // // Draw ----------------
+        // Draw ----------------
         
         cubeMesh->draw(crateShader);
         backpack->draw(backpackShader);

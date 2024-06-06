@@ -78,8 +78,7 @@ void main(){
     vec3 result = calcDirectionalLight(directionalLight, norm, viewDir);
 
     // Point
-    for(int i = 0; i < activePointLights; i++)
-        result += calcPointLight(pointLights[i], norm, fragPos, viewDir);    
+    for(int i = 0; i < activePointLights; i++) result += calcPointLight(pointLights[i], norm, fragPos, viewDir);    
     
     // Spot
     // for(int i = 0; i < activeSpotLights; i++)
