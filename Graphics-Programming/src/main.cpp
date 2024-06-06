@@ -60,6 +60,7 @@ int main(){
     /* Shaders */
     Shader* crateShader = new Shader("res/shaders", "lightsPhongMvp");
     Shader* backpackShader = new Shader("res/shaders", "lightsPhongMvp");
+    Shader* skyboxShader = new Shader("res/shaders", "skyboxMvp");
 
     /* Textures */
     std::vector<Texture2D*> noTextures;
@@ -115,6 +116,11 @@ int main(){
 
         // Draw ----------------
         
+        /* Skybox */
+        glDisable(GL_DEPTH);
+        cubeMesh->draw(skyboxShader);
+        glEnable(GL_DEPTH);
+
         cubeMesh->draw(crateShader);
         backpack->draw(backpackShader);
 
