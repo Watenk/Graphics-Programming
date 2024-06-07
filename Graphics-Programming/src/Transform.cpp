@@ -7,9 +7,14 @@
 Transform::Transform(glm::vec3 position, glm::vec3 size, glm::quat rotation) : parent(nullptr), position(position), localPosition(position), size(size), localSize(size), rotation(rotation), localRotation(rotation) {}
 
 Transform::Transform(Transform* parent, glm::vec3 position, glm::vec3 size, glm::quat rotation) : parent(parent), position(position), size(size), rotation(rotation) {
+    parent->children.push_back(this);
     localPosition = parent->getPosition() - position;
     localSize = parent->getSize() - size;
     localRotation = glm::conjugate(parent->getRotation()) * rotation;
+}
+
+void Transform::Init(){
+    
 }
 
 /* Model Matrix */

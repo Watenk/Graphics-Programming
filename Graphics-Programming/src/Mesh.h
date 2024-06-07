@@ -2,6 +2,7 @@
 
 #include "Shader.h"
 #include "Texture2D.h"
+#include"Interfaces/Component.h"
 
 #include <vector>
 
@@ -10,15 +11,17 @@ const std::vector<int> ATTRIBUTES = {
     3,       3,           2,      
 };
 
-class Mesh{
+class Mesh : public Component{
 public:
-    Transform transform;
+    Transform* transform;
+
     const std::vector<float> vertices;
     const std::vector<unsigned int> indices;
     const std::vector<Texture2D*> textures;
 
     Mesh(const int usage, const std::vector<float> vertices, const std::vector<unsigned int> indices, const std::vector<Texture2D*> textures, const Camera* cam, const std::vector<int> attributes = ATTRIBUTES); 
     ~Mesh();
+    void Init() override;
     
     /* Draws this mesh */
     void draw(Shader* shader) const;

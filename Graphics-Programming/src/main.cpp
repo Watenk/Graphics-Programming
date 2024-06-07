@@ -90,10 +90,6 @@ int main(){
     backpackShader->setInt("material.specularTexture", 1);
     backpackShader->setFloat("material.shininess", 64.0f);
 
-    for (Mesh* mesh : backpack->meshes){
-        mesh->transform.move(glm::vec3(10, 0, 0));
-    }
-
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
 

@@ -56,6 +56,10 @@ Mesh::~Mesh(){
     }
 }
 
+void Mesh::Init(){
+    transform = gameObject->getComponent<Transform>();
+}
+
 void Mesh::draw(Shader* shader) const{
     bind();
     updateShaderUniforms(shader);
@@ -66,7 +70,7 @@ void Mesh::draw(Shader* shader) const{
 void Mesh::updateShaderUniforms(Shader* shader) const{
 
     /* Shader MVP Uniforms */
-    shader->setMatrix4("model", transform.getModelMatrix());
+    shader->setMatrix4("model", transform->getModelMatrix());
     shader->setMatrix4("view", cam->getViewMatrix());
     shader->setMatrix4("projection", cam->getProjectionMatrix());
 

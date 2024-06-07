@@ -3,12 +3,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <vector>
+#include "Interfaces/Component.h"
 
 const glm::vec3 POSITION = glm::vec3(0.0f, 0.0f, 0.0f);
 const glm::vec3 SIZE = glm::vec3(1.0f, 1.0f, 1.0f);
 const glm::quat ROTATION = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 
-class Transform{
+class Transform : public Component{
 
 public:
     /* Parent-Child */
@@ -29,6 +30,7 @@ private:
 public:
     Transform(glm::vec3 position = POSITION, glm::vec3 size = SIZE, glm::quat rotation = ROTATION);
     Transform(Transform* parent, glm::vec3 position = POSITION, glm::vec3 size = SIZE, glm::quat rotation = ROTATION);
+    void Init() override;
 
     /* Model Matrix */
     glm::mat4 getModelMatrix() const;

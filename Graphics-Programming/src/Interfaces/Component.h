@@ -1,7 +1,10 @@
 #pragma once
 
-class Component {
+#include "../GameObject.h"
+
+class Component{
 public:
-    virtual ~Component() {}
-    virtual void update() = 0;
+    GameObject* gameObject;
+
+    virtual void Init() = 0;
 };
