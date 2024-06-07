@@ -11,7 +11,8 @@ void InputHandler::update(GLFWwindow* window){
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) executeKeyCallback(EInputs::right);
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) executeKeyCallback(EInputs::up);
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) executeKeyCallback(EInputs::down);
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) executeKeyCallback(EInputs::boost);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) executeKeyCallback(EInputs::boostDown);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE) executeKeyCallback(EInputs::boostUp);
 
     /* Mouse */
     executeMouseCallback();

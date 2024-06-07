@@ -28,6 +28,10 @@ public:
 
     TextureType type;
     std::string texturePath;
+    int width;
+    int height;
+    int channels;
+    unsigned char* data;
 
 private:
     unsigned int texture;

@@ -5,7 +5,8 @@
 #include "Time.h"
 
 const float MOUSESENSITIVITY = 0.1f;
-const float SPEED = 1.0f;
+const float SPEED = 5.0f;
+const float BOOSTSPEED = 100.0f;
 
 class PlayerController{
 
@@ -27,6 +28,7 @@ private:
     void onLeft();
     void onUp();
     void onDown();
-    void onBoost();
+    void onBoostDown();
+    void onBoostUp();
     void onMouse(glm::vec2 mousePos);
 };

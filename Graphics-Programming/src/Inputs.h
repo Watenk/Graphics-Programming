@@ -7,5 +7,6 @@ enum EInputs {
     right,
     up,
     down,
-    boost,
+    boostDown,
+    boostUp,
 };

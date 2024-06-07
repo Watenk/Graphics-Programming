@@ -3,8 +3,8 @@
 #include <glad/glad.h>
 #include <iostream>
 
-Mesh::Mesh(const int usage, const std::vector<float> vertices, const std::vector<unsigned int> indices, const std::vector<Texture2D*> textures, const Camera* cam, const std::vector<int> attributes) 
-          : vertices(vertices), indices(indices), textures(textures), cam(cam){
+Mesh::Mesh(const int usage, const std::vector<float> vertices, const std::vector<unsigned int> indices, const Camera* cam, const std::vector<Texture2D*> textures, const std::vector<int> attributes) 
+          : vertices(vertices), indices(indices), cam(cam), textures(textures){
 
     /* Generate Buffers */
     glGenVertexArrays(1, &VAO);

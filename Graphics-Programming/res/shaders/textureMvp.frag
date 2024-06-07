@@ -1,11 +1,17 @@
 #version 330 core
 out vec4 FragColor;
 
-in vec2 TexCoord;
+struct Material{
+    // Light Maps
+    sampler2D diffuseTexture;
+    sampler2D specularTexture;
 
-uniform sampler2D texture0;
+    float shininess;
+}; 
+
+in vec2 TexCoord;
 
 void main()
 {
-	FragColor = texture(texture0, TexCoord);
+	FragColor = texture(diffuseTexture, TexCoord);
 }

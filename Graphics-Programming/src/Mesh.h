@@ -10,6 +10,8 @@ const std::vector<int> ATTRIBUTES = {
     3,       3,           2,      
 };
 
+const std::vector<Texture2D*> TEXTURES = {};
+
 class Mesh{
 public:
     Transform transform;
@@ -17,7 +19,7 @@ public:
     const std::vector<unsigned int> indices;
     const std::vector<Texture2D*> textures;
 
-    Mesh(const int usage, const std::vector<float> vertices, const std::vector<unsigned int> indices, const std::vector<Texture2D*> textures, const Camera* cam, const std::vector<int> attributes = ATTRIBUTES); 
+    Mesh(const int usage, const std::vector<float> vertices, const std::vector<unsigned int> indices, const Camera* cam, const std::vector<Texture2D*> textures = TEXTURES, const std::vector<int> attributes = ATTRIBUTES); 
     ~Mesh();
     
     /* Draws this mesh */

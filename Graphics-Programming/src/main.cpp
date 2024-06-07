@@ -13,6 +13,7 @@
 #include "PlayerController.h"
 #include "Model.h"
 #include "lights.h"
+#include "Terrain.h"
 
 const char* WINDOWNAME = "Unreal Engine 6";
 const unsigned int WINDOWWIDTH = 1280;
@@ -47,19 +48,20 @@ int main(){
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wireframe Mode
     glEnable(GL_DEPTH_TEST); // Enable Depth Test
     // Cull backfaces
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     /* Add Managers */
     input = new InputHandler(window);
     watenkTime = new Watenk::Time();
-    cam = new Camera(WINDOWWIDTH, WINDOWHEIGHT, POSITION, 90.0f, 0.1f, 1000.0f);
+    cam = new Camera(WINDOWWIDTH, WINDOWHEIGHT, POSITION, 90.0f, 0.1f, 5000.0f);
     player = new PlayerController(input, watenkTime, cam, 5.0f);
     lights = new Lights();
 
     /* Shaders */
     Shader* crateShader = new Shader("res/shaders", "lightsPhongMvp");
     Shader* backpackShader = new Shader("res/shaders", "lightsPhongMvp");
+    Shader* terrainShader = new Shader("res/shaders", "lightsPhongMvp");
     Shader* skyboxShader = new Shader("res/shaders", "skyboxMvp");
 
     /* Textures */
@@ -68,19 +70,23 @@ int main(){
     std::vector<Texture2D*> crateTextures;
     Texture2D* container = new Texture2D("res/textures/container.png", TextureType::diffuse);
     Texture2D* containerSpecular = new Texture2D("res/textures/containerSpecular.png", TextureType::specular);
+    Texture2D* heightmap = new Texture2D("res/textures/heightmap.png", TextureType::diffuse);
     crateTextures.push_back(container);
     crateTextures.push_back(containerSpecular);
 
     /* Meshes */
-    Mesh* crateMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices(), crateTextures, cam);
-    Mesh* skyboxMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices(), crateTextures, cam);
+    Mesh* crateMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices(), cam, crateTextures);
+    Mesh* skyboxMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices(), cam);
 
     /* Models */
-    Model* backpack = new Model(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", cam);
+    //Model* backpack = new Model(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", cam);
+
+    Terrain* terrain = new Terrain(heightmap, cam, 100.0f, 5.0f);
 
     /* Lights */
     lights->addShader(crateShader);
     lights->addShader(backpackShader);
+    lights->addShader(terrainShader);
 
     /* Material uniforms */
     crateShader->setInt("material.diffuseTexture", 0);
@@ -91,10 +97,14 @@ int main(){
     backpackShader->setInt("material.specularTexture", 1);
     backpackShader->setFloat("material.shininess", 64.0f);
 
+    terrainShader->setInt("material.diffuseTexture", 0);
+    terrainShader->setInt("material.specularTexture", 1);
+    terrainShader->setFloat("material.shininess", 64.0f);
+
     /* World Positions */
-    for (Mesh* mesh : backpack->meshes){
-        mesh->transform.move(glm::vec3(10, 0, 0));
-    }
+    // for (Mesh* mesh : backpack->meshes){
+    //     mesh->transform.move(glm::vec3(10, 0, 0));
+    // }
 
     skyboxMesh->transform.setParent(cam->transform);
     crateMesh->transform.setPosition(glm::vec3(1.0f));
@@ -131,9 +141,10 @@ int main(){
 	    glEnable(GL_DEPTH);
 
         crateMesh->draw(crateShader);
-        backpack->draw(backpackShader);
+        //backpack->draw(backpackShader);
+        terrain->mesh->draw(terrainShader);
 
-        // Draw end -----------a
+        // Draw end -------------
 
         glfwSwapBuffers(window);
         glfwPollEvents(); // Windows Window Events

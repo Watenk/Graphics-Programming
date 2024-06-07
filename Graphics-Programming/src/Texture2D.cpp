@@ -20,15 +20,14 @@ Texture2D::Texture2D(const std::string& texturePath, TextureType type, const int
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magnifyFilterMode);
 
     /* Load Texture */
-    int width, height, nrChannels;
-    unsigned char *data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
+    data = stbi_load(texturePath.c_str(), &width, &height, &channels, 0);
     if (data){
         GLenum format;
-        if (nrChannels == 1)
+        if (channels == 1)
             format = GL_RED;
-        else if (nrChannels == 3)
+        else if (channels == 3)
             format = GL_RGB;
-        else if (nrChannels == 4)
+        else if (channels == 4)
             format = GL_RGBA;
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);

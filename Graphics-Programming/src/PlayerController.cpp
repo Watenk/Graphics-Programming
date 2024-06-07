@@ -11,7 +11,8 @@ PlayerController::PlayerController(InputHandler* &input, Watenk::Time* &watenkTi
     input->addKeyCallBack(EInputs::left, [this](){ this->onLeft(); });
     input->addKeyCallBack(EInputs::up, [this](){ this->onUp(); });
     input->addKeyCallBack(EInputs::down, [this](){ this->onDown(); });
-    input->addKeyCallBack(EInputs::boost, [this](){ this->onBoost(); });
+    input->addKeyCallBack(EInputs::boostDown, [this](){ this->onBoostDown(); });
+    input->addKeyCallBack(EInputs::boostUp, [this](){ this->onBoostUp(); });
     input->addMouseCallback([this](glm::vec2 mousePos){ this->onMouse(mousePos) ;});
 }
 
@@ -43,7 +44,13 @@ void PlayerController::onDown(){
     cam->transform->move(cam->transform->getUp() * speed * -1.0f * watenkTime->getDeltaTime());
 }
 
-void PlayerController::onBoost() {}
+void PlayerController::onBoostDown(){
+    speed = BOOSTSPEED;
+}
+
+void PlayerController::onBoostUp() {
+    speed = SPEED;
+}
 
 void PlayerController::onMouse(glm::vec2 mousePos){
     // Pitch = y = up down ------ yaw = z = left right

@@ -98,7 +98,7 @@ Mesh* Model::convertAIMeshToMesh(const int usage, aiMesh *mesh, const aiScene *s
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     }  
 
-    return new Mesh(usage, vertices, indices, textures, cam);
+    return new Mesh(usage, vertices, indices, cam, textures);
 }
 
 std::vector<Texture2D*> Model::loadTexturesType(aiMaterial *material, TextureType type){
