@@ -103,12 +103,13 @@ int main(){
         input->update(window);
         watenkTime->update();
 
-        /* GameObject Updates */
-        //cubeMesh->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
-
         /* Uniform Updates */
+        skyboxShader->setVec3("viewDirection", cam->transform.getFront());
         crateShader->setVec3("viewPos", cam->transform.position);
         backpackShader->setVec3("viewPos", cam->transform.position);
+
+        /* GameObject Updates */
+        cubeMesh->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
 
         /* Buffers */
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);

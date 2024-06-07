@@ -6,6 +6,9 @@
 
 Transform::Transform(glm::vec3 position, glm::vec3 scale, glm::quat rotation) : position(POSITION), size(SIZE), rotation(ROTATION) {}
 
+Transform::Transform(Transform* parent, glm::vec3 position, glm::vec3 scale, glm::quat rotation) : parent(parent), position(POSITION), size(SIZE), rotation(ROTATION) {}
+
+/* Model Matrix */
 glm::mat4 Transform::getModelMatrix() const{
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, position);
@@ -14,17 +17,7 @@ glm::mat4 Transform::getModelMatrix() const{
     return modelMatrix;
 }
 
-void Transform::printModelMatrix() const{
-    glm::mat4 modelMatrix = getModelMatrix();
-
-    for (int x = 0; x < 4; ++x) {
-        for (int y = 0; y < 4; ++y) {
-            std::cout << modelMatrix[y][x] << " ";
-        }
-        std::cout << std::endl;
-    }
-}
-
+/* Directions */
 glm::vec3 Transform::getFront() const{
     glm::vec3 eulerDegrees = getEuler();
     glm::vec3 front;  
@@ -46,22 +39,75 @@ glm::vec3 Transform::getUp() const{
     return up;
 }
 
+/* Transform */
+glm::vec3 Transform::getPosition() const{
+    return position;
+}
+
+glm::vec3 Transform::getSize() const{
+    return size;
+}
+
 glm::vec3 Transform::getEuler() const{
     return glm::degrees(glm::eulerAngles(rotation));
 }
 
-void Transform::setEuler(const glm::vec3& eulerAnglesDegrees){
-    rotation = glm::quat(glm::radians(eulerAnglesDegrees));
+glm::quat Transform::getRotation() const{
+    return rotation;
 }
 
+glm::vec3 Transform::getLocalPosition() const{
+    return localPosition;
+}
+
+glm::vec3 Transform::getLocalSize() const{
+    return localSize;
+}
+
+glm::quat Transform::getLocalRotation() const{
+    return localRotation;
+}
+
+void Transform::setPosition(const glm::vec3 newPosition){
+    position = newPosition;
+    localPosition = parent->getPosition() - position;
+
+    for (Transform* child : children){
+        child->setPosition(position + child->getLocalPosition());
+    }
+}
+
+void Transform::setSize(const glm::vec3 newSize){
+    size = newSize;
+    localSize = parent->getSize() - size;
+
+    for (Transform* child : children){
+        child->setSize(size + child->getLocalSize());
+    }
+}
+
+void Transform::setRotation(const glm::quat newRotation){
+    rotation = newRotation;
+    localRotation = glm::conjugate(parent->getRotation()) * rotation;
+    
+    for (Transform* child : children){
+        child->setRotation(rotation * child->getLocalRotation());
+    }
+}
+
+void Transform::setRotation(const glm::vec3& eulerDegrees){
+    setRotation(glm::quat(glm::radians(eulerDegrees)));
+}
+
+/* Transform interactions */
 void Transform::move(const glm::vec3& moveAmount){
-    position += moveAmount;
+    setPosition(position += moveAmount);
 }
 
 void Transform::scale(const glm::vec3& scaleAmount){
-    size += scaleAmount;
+    setSize(size += scaleAmount);
 }
 
-void Transform::rotate(const glm::vec3& rotateEulerAngleDegrees){
-    rotation *= glm::quat(glm::radians(rotateEulerAngleDegrees));
+void Transform::rotate(const glm::vec3& rotateAmountEulerDegrees){
+    setRotation(rotation *= glm::quat(glm::radians(rotateAmountEulerDegrees)));
 }

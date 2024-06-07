@@ -53,7 +53,7 @@ void PlayerController::onMouse(glm::vec2 mousePos){
     float yRotation = glm::clamp(cam->transform.getEuler().y + mouseDeltaY, -89.0f, 89.0f);
     float zRotation = cam->transform.getEuler().z + mouseDeltaX;
 
-    cam->transform.setEuler(glm::vec3(0.0f, yRotation, zRotation));
+    cam->transform.setRotation(glm::vec3(0.0f, yRotation, zRotation));
 
     lastMousePos = mousePos;
 }
