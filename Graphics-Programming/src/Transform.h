@@ -50,6 +50,7 @@ public:
     void setSize(const glm::vec3 newSize);
     void setRotation(const glm::quat newRotation);
     void setRotation(const glm::vec3& eulerDegrees);
+    void setParent(Transform* parent);
 
     /* Transform interactions */
     void move(const glm::vec3& moveAmount);

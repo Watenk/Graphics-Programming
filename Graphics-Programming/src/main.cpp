@@ -72,7 +72,8 @@ int main(){
     crateTextures.push_back(containerSpecular);
 
     /* Meshes */
-    Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices(), crateTextures, cam);
+    Mesh* crateMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices(), crateTextures, cam);
+    Mesh* skyboxMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices(), crateTextures, cam);
 
     /* Models */
     Model* backpack = new Model(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", cam);
@@ -90,9 +91,12 @@ int main(){
     backpackShader->setInt("material.specularTexture", 1);
     backpackShader->setFloat("material.shininess", 64.0f);
 
+    /* World Positions */
     for (Mesh* mesh : backpack->meshes){
         mesh->transform.move(glm::vec3(10, 0, 0));
     }
+
+    skyboxMesh->transform.setParent(cam->transform);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
@@ -102,12 +106,12 @@ int main(){
         watenkTime->update();
 
         /* Uniform Updates */
-        skyboxShader->setVec3("viewDirection", cam->transform.getFront());
-        crateShader->setVec3("viewPos", cam->transform.getPosition());
-        backpackShader->setVec3("viewPos", cam->transform.getPosition());
+        skyboxShader->setVec3("viewDirection", cam->transform->getFront());
+        crateShader->setVec3("viewPos", cam->transform->getPosition());
+        backpackShader->setVec3("viewPos", cam->transform->getPosition());
 
         /* GameObject Updates */
-        cubeMesh->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
+        crateMesh->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
 
         /* Buffers */
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -116,11 +120,15 @@ int main(){
         // Draw ----------------
         
         /* Skybox */
-        glDisable(GL_DEPTH);
-        cubeMesh->draw(skyboxShader);
-        glEnable(GL_DEPTH);
+	    glDisable(GL_CULL_FACE);
+	    glDisable(GL_DEPTH_TEST);
+	    glDisable(GL_DEPTH);
+        skyboxMesh->draw(skyboxShader);
+        glEnable(GL_CULL_FACE);
+	    glEnable(GL_DEPTH_TEST);
+	    glEnable(GL_DEPTH);
 
-        cubeMesh->draw(crateShader);
+        crateMesh->draw(crateShader);
         backpack->draw(backpackShader);
 
         // Draw end -----------a

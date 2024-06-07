@@ -20,27 +20,27 @@ PlayerController::~PlayerController(){
 }
 
 void PlayerController::onForwards(){
-    cam->transform.move(cam->transform.getFront() * speed * watenkTime->getDeltaTime());
+    cam->transform->move(cam->transform->getFront() * speed * watenkTime->getDeltaTime());
 }
 
 void PlayerController::onBackwards(){
-    cam->transform.move(cam->transform.getFront() * speed * -1.0f * watenkTime->getDeltaTime());
+    cam->transform->move(cam->transform->getFront() * speed * -1.0f * watenkTime->getDeltaTime());
 }
 
 void PlayerController::onRight(){
-    cam->transform.move(cam->transform.getRight() * speed * watenkTime->getDeltaTime());
+    cam->transform->move(cam->transform->getRight() * speed * watenkTime->getDeltaTime());
 }
 
 void PlayerController::onLeft(){
-    cam->transform.move(cam->transform.getRight() * speed * -1.0f * watenkTime->getDeltaTime());
+    cam->transform->move(cam->transform->getRight() * speed * -1.0f * watenkTime->getDeltaTime());
 }
 
 void PlayerController::onUp(){
-    cam->transform.move(cam->transform.getUp() * speed * watenkTime->getDeltaTime());
+    cam->transform->move(cam->transform->getUp() * speed * watenkTime->getDeltaTime());
 }
 
 void PlayerController::onDown(){
-    cam->transform.move(cam->transform.getUp() * speed * -1.0f * watenkTime->getDeltaTime());
+    cam->transform->move(cam->transform->getUp() * speed * -1.0f * watenkTime->getDeltaTime());
 }
 
 void PlayerController::onBoost() {}
@@ -50,10 +50,10 @@ void PlayerController::onMouse(glm::vec2 mousePos){
     float mouseDeltaX = (mousePos.x - lastMousePos.x) * mouseSensitivity;
     float mouseDeltaY = (lastMousePos.y - mousePos.y) * mouseSensitivity;
 
-    float yRotation = glm::clamp(cam->transform.getEuler().y + mouseDeltaY, -89.0f, 89.0f);
-    float zRotation = cam->transform.getEuler().z + mouseDeltaX;
+    float yRotation = glm::clamp(cam->transform->getEuler().y + mouseDeltaY, -89.0f, 89.0f);
+    float zRotation = cam->transform->getEuler().z + mouseDeltaX;
 
-    cam->transform.setRotation(glm::vec3(0.0f, yRotation, zRotation));
+    cam->transform->setRotation(glm::vec3(0.0f, yRotation, zRotation));
 
     lastMousePos = mousePos;
 }

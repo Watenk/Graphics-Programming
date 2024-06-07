@@ -12,7 +12,7 @@ const float FARPLANECUTOFF = 100.0f;
 class Camera{
 
 public:
-    Transform transform;
+    Transform* transform;
     float fov;
     float nearPlaneCutoff;
     float farPlaneCutoff;
