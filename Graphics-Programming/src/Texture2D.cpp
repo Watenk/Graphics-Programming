@@ -30,15 +30,15 @@ Texture2D::Texture2D(const std::string& texturePath, TextureType type, const int
         else if (channels == 4)
             format = GL_RGBA;
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else{
         std::cout << "Failed to load Texture2D" << std::endl;
     }
-
+    
     /* Cleanup */
-    stbi_image_free(data);
+    //stbi_image_free(data);
 }
 
 Texture2D::~Texture2D(){

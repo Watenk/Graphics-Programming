@@ -70,22 +70,23 @@ void Mesh::updateShaderUniforms(Shader* shader) const{
     shader->setMatrix4("view", cam->getViewMatrix());
     shader->setMatrix4("projection", cam->getProjectionMatrix());
 
-    /* Shader Texture Uniforms */
+    /* Shader Material Uniforms */
     int diffuseIndex = 0;
     int specularIndex = 0;
     for (Texture2D* texture : textures){
         texture->bind();
         if (texture->type == TextureType::diffuse){
-            std::string textureName = std::to_string(texture->type) + std::to_string(diffuseIndex);
-            glUniform1i(glGetUniformLocation(shader->getID(), textureName.c_str()), diffuseIndex);
+            std::string textureName = "material.diffuse" + std::to_string(diffuseIndex);
+            shader->setInt(textureName.c_str(), diffuseIndex + specularIndex);
             diffuseIndex++;
         }
         else if (texture->type == TextureType::specular){
-            std::string textureName = std::to_string(texture->type) + std::to_string(specularIndex);
-            glUniform1i(glGetUniformLocation(shader->getID(), textureName.c_str()), specularIndex);
+            std::string textureName = "material.specular" + std::to_string(specularIndex);
+            shader->setInt(textureName.c_str(), diffuseIndex + specularIndex);
             specularIndex++;
         }
     }
+    shader->setFloat("material.shininess", 64.0f);
 }
 
 void Mesh::bind() const{

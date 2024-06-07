@@ -48,8 +48,8 @@ int main(){
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wireframe Mode
     glEnable(GL_DEPTH_TEST); // Enable Depth Test
     // Cull backfaces
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
 
     /* Add Managers */
     input = new InputHandler(window);
@@ -81,30 +81,12 @@ int main(){
     /* Models */
     //Model* backpack = new Model(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", cam);
 
-    Terrain* terrain = new Terrain(heightmap, cam, 100.0f, 5.0f);
+    Terrain* terrain = new Terrain(heightmap, cam, 50.0f);
 
     /* Lights */
     lights->addShader(crateShader);
     lights->addShader(backpackShader);
     lights->addShader(terrainShader);
-
-    /* Material uniforms */
-    crateShader->setInt("material.diffuseTexture", 0);
-    crateShader->setInt("material.specularTexture", 1);
-    crateShader->setFloat("material.shininess", 64.0f);
-
-    backpackShader->setInt("material.diffuseTexture", 0);
-    backpackShader->setInt("material.specularTexture", 1);
-    backpackShader->setFloat("material.shininess", 64.0f);
-
-    terrainShader->setInt("material.diffuseTexture", 0);
-    terrainShader->setInt("material.specularTexture", 1);
-    terrainShader->setFloat("material.shininess", 64.0f);
-
-    /* World Positions */
-    // for (Mesh* mesh : backpack->meshes){
-    //     mesh->transform.move(glm::vec3(10, 0, 0));
-    // }
 
     skyboxMesh->transform.setParent(cam->transform);
     crateMesh->transform.setPosition(glm::vec3(1.0f));
@@ -121,6 +103,7 @@ int main(){
         skyboxShader->setVec3("lightDirection", lights->getDirectionalLight().direction);
         crateShader->setVec3("viewPos", cam->transform->getPosition());
         backpackShader->setVec3("viewPos", cam->transform->getPosition());
+        terrainShader->setVec3("viewPos", cam->transform->getPosition());
 
         /* GameObject Updates */
         crateMesh->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
