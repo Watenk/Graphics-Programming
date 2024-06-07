@@ -97,6 +97,7 @@ int main(){
     }
 
     skyboxMesh->transform.setParent(cam->transform);
+    crateMesh->transform.setPosition(glm::vec3(1.0f));
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
@@ -106,7 +107,8 @@ int main(){
         watenkTime->update();
 
         /* Uniform Updates */
-        skyboxShader->setVec3("viewDirection", cam->transform->getFront());
+        skyboxShader->setVec3("viewPos", cam->transform->getPosition());
+        skyboxShader->setVec3("lightDirection", lights->getDirectionalLight().direction);
         crateShader->setVec3("viewPos", cam->transform->getPosition());
         backpackShader->setVec3("viewPos", cam->transform->getPosition());
 
