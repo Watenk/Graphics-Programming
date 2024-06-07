@@ -94,8 +94,6 @@ int main(){
         mesh->transform.move(glm::vec3(10, 0, 0));
     }
 
-    std::cout << backpack->meshes[0]->textures[1]->texturePath << std::endl;
-
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
 
@@ -105,8 +103,8 @@ int main(){
 
         /* Uniform Updates */
         skyboxShader->setVec3("viewDirection", cam->transform.getFront());
-        crateShader->setVec3("viewPos", cam->transform.position);
-        backpackShader->setVec3("viewPos", cam->transform.position);
+        crateShader->setVec3("viewPos", cam->transform.getPosition());
+        backpackShader->setVec3("viewPos", cam->transform.getPosition());
 
         /* GameObject Updates */
         cubeMesh->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));

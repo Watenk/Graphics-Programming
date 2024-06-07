@@ -27,8 +27,8 @@ private:
     glm::quat localRotation;
 
 public:
-    Transform(glm::vec3 position = POSITION, glm::vec3 scale = SIZE, glm::quat rotation = ROTATION);
-    Transform(Transform* parent, glm::vec3 position = POSITION, glm::vec3 scale = SIZE, glm::quat rotation = ROTATION);
+    Transform(glm::vec3 position = POSITION, glm::vec3 size = SIZE, glm::quat rotation = ROTATION);
+    Transform(Transform* parent, glm::vec3 position = POSITION, glm::vec3 size = SIZE, glm::quat rotation = ROTATION);
 
     /* Model Matrix */
     glm::mat4 getModelMatrix() const;

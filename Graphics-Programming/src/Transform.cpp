@@ -4,9 +4,13 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>
 
-Transform::Transform(glm::vec3 position, glm::vec3 scale, glm::quat rotation) : position(POSITION), size(SIZE), rotation(ROTATION) {}
+Transform::Transform(glm::vec3 position, glm::vec3 size, glm::quat rotation) : parent(nullptr), position(position), localPosition(position), size(size), localSize(size), rotation(rotation), localRotation(rotation) {}
 
-Transform::Transform(Transform* parent, glm::vec3 position, glm::vec3 scale, glm::quat rotation) : parent(parent), position(POSITION), size(SIZE), rotation(ROTATION) {}
+Transform::Transform(Transform* parent, glm::vec3 position, glm::vec3 size, glm::quat rotation) : parent(parent), position(position), size(size), rotation(rotation) {
+    localPosition = parent->getPosition() - position;
+    localSize = parent->getSize() - size;
+    localRotation = glm::conjugate(parent->getRotation()) * rotation;
+}
 
 /* Model Matrix */
 glm::mat4 Transform::getModelMatrix() const{
@@ -70,7 +74,8 @@ glm::quat Transform::getLocalRotation() const{
 
 void Transform::setPosition(const glm::vec3 newPosition){
     position = newPosition;
-    localPosition = parent->getPosition() - position;
+    if (parent != nullptr) localPosition = parent->getPosition() - position;
+    else localPosition = POSITION - position;
 
     for (Transform* child : children){
         child->setPosition(position + child->getLocalPosition());
@@ -79,7 +84,8 @@ void Transform::setPosition(const glm::vec3 newPosition){
 
 void Transform::setSize(const glm::vec3 newSize){
     size = newSize;
-    localSize = parent->getSize() - size;
+    if (parent != nullptr) localSize = parent->getSize() - size;
+    else localSize = SIZE - size;
 
     for (Transform* child : children){
         child->setSize(size + child->getLocalSize());
@@ -88,8 +94,9 @@ void Transform::setSize(const glm::vec3 newSize){
 
 void Transform::setRotation(const glm::quat newRotation){
     rotation = newRotation;
-    localRotation = glm::conjugate(parent->getRotation()) * rotation;
-    
+    if (parent != nullptr) localRotation = glm::conjugate(parent->getRotation()) * rotation;
+    else localRotation = glm::conjugate(ROTATION) * rotation;
+
     for (Transform* child : children){
         child->setRotation(rotation * child->getLocalRotation());
     }
