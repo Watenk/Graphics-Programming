@@ -7,7 +7,7 @@
 
 // Public
 
-Shader::Shader(const std::string& shadersPath, const std::string& shaderName){
+Shader::Shader(const std::string& shaderName, const std::string& shadersPath){
     // Shader Parseing
     std::string vertexString = FileUtil::parsePath(shadersPath + "/" + shaderName + ".vert");
     std::string fragmentString = FileUtil::parsePath(shadersPath + "/" + shaderName + ".frag");
@@ -159,6 +159,6 @@ const unsigned int Shader::createShaderProgram(const unsigned int vertexShader, 
 unsigned int Shader::getUniformLocation(const char* name){
     bind();
     int uniformLocation = glGetUniformLocation(shaderProgramID, name);
-    if (uniformLocation == -1) std::cerr << "Uniform " << name  << " doesn't exist in the shader program!" << std::endl;
+    //if (uniformLocation == -1) std::cerr << "Uniform " << name  << " doesn't exist in the shader program!" << std::endl;
     return (unsigned int)uniformLocation;
 }

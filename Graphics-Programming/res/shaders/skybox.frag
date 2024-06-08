@@ -2,14 +2,12 @@
 out vec4 FragColor;
 
 struct Material{
-    // Light Maps
-    sampler2D diffuse0;
-    sampler2D specular0;
-
+    sampler2D diffuse;
+    sampler2D specular;
     float shininess;
 }; 
 
-in vec4 worldPosition;
+in vec4 fragPos;
 
 uniform vec3 viewPos;
 uniform vec3 lightDirection;
@@ -24,7 +22,7 @@ void main()
 	vec3 bottomColor = normalizeRGB(vec3(188.0f, 214.0f, 231.0f));
 	vec3 sunColor = normalizeRGB(vec3(255, 200, 50));
 
-	vec3 viewDirection = normalize(worldPosition.xyz - viewPos);
+	vec3 viewDirection = normalize(fragPos.xyz - viewPos);
 	float sun = max(pow(dot(viewDirection, normalize(lightDirection)), material.shininess), 0.0f);
 
 	FragColor = vec4(lerp(bottomColor, topColor, abs(viewDirection.y)) + sun * sunColor, 1.0f);

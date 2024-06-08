@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 
-Terrain::Terrain(Texture2D* heightmap, Camera* cam, float heightScale, float xzScale) : heightmap(heightmap){
+Terrain::Terrain(Texture2D* heightmap, float heightScale, float xzScale) : heightmap(heightmap){
     
     int verticesAmount = heightmap->width * heightmap->height;
     int indicesAmount = (heightmap->width - 1) * (heightmap->height - 1);
@@ -63,11 +63,11 @@ Terrain::Terrain(Texture2D* heightmap, Camera* cam, float heightScale, float xzS
         indices.push_back(vertex + 1);
     }
 
-    Texture2D* heightmapSpecular = new Texture2D("res/textures/heightmap.png", TextureType::specular);
+    Texture2D* heightmapSpecular = new Texture2D("res/textures/heightmap.png");
     std::vector<Texture2D*> textures;
     textures.push_back(heightmap);
     textures.push_back(heightmapSpecular);
 
     std::cout << "Generated terrain with " << vertices.size() / 8 << " vertices and " << indices.size() / 6 << " indices" << std::endl;
-    mesh = new Mesh(GL_STATIC_DRAW, vertices, indices, cam, textures);
+    mesh = new Mesh(GL_STATIC_DRAW, vertices, indices);
 }

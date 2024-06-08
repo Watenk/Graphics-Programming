@@ -7,7 +7,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
-Model::Model(const int usage, const std::string path, const Camera* cam){
+Model::Model(const int usage, const std::string path, Camera* cam) : cam(cam){
     /* Read the model */
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_OptimizeMeshes);	
@@ -32,9 +32,9 @@ Model::~Model(){
 }
 
 void Model::draw(Shader* shader) const{
-    for (Mesh* mesh : meshes){
-        mesh->draw(shader);
-    }
+    // for (Mesh* mesh : meshes){
+    //     mesh->draw(shader, loadedTextures, cam);
+    // }
 }
 
 void Model::processNode(const int usage, aiNode *node, const aiScene *scene, const Camera* cam){
@@ -90,56 +90,56 @@ Mesh* Model::convertAIMeshToMesh(const int usage, aiMesh *mesh, const aiScene *s
         aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
         /* Diffuse Maps */
-        std::vector<Texture2D*> diffuseMaps = loadTexturesType(material, TextureType::diffuse);
+        std::vector<Texture2D*> diffuseMaps = loadTexturesType(material);
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
         /* Specular Maps */
-        std::vector<Texture2D*> specularMaps = loadTexturesType(material, TextureType::specular);
+        std::vector<Texture2D*> specularMaps = loadTexturesType(material);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     }  
 
-    return new Mesh(usage, vertices, indices, cam, textures);
+    return new Mesh(usage, vertices, indices);
 }
 
-std::vector<Texture2D*> Model::loadTexturesType(aiMaterial *material, TextureType type){
+std::vector<Texture2D*> Model::loadTexturesType(aiMaterial *material){
 
-    /* Texture Type */
-    aiTextureType aiType;
-    switch (type){
-    case TextureType::diffuse:
-        aiType = aiTextureType_DIFFUSE;
-        break;
+    // /* Texture Type */
+    // aiTextureType aiType;
+    // switch (type){
+    // case TextureType::diffuse:
+    //     aiType = aiTextureType_DIFFUSE;
+    //     break;
     
-    case TextureType::specular:
-        aiType = aiTextureType_SPECULAR;
-        break;
-    }
+    // case TextureType::specular:
+    //     aiType = aiTextureType_SPECULAR;
+    //     break;
+    // }
 
-    std::vector<Texture2D*> textures;
-    for(unsigned int i = 0; i < material->GetTextureCount(aiType); i++){
+     std::vector<Texture2D*> textures;
+    // for(unsigned int i = 0; i < material->GetTextureCount(aiType); i++){
         
-        /* Get Texture Path */
-        aiString textureName;
-        material->GetTexture(aiType, i, &textureName);
-        std::string path = std::string(directory + "/" + textureName.C_Str());
+    //     /* Get Texture Path */
+    //     aiString textureName;
+    //     material->GetTexture(aiType, i, &textureName);
+    //     std::string path = std::string(directory + "/" + textureName.C_Str());
 
-        /* Load Texture */
-        /* Check if cached texture */
-        bool skip = false;
-        for(Texture2D* texture : loadedTextures){
-            if(std::strcmp(texture->texturePath.c_str(), path.c_str()) == 0){
-                textures.push_back(texture);
-                skip = true; 
-                break;
-            }
-        }
+    //     /* Load Texture */
+    //     /* Check if cached texture */
+    //     bool skip = false;
+    //     for(Texture2D* texture : loadedTextures){
+    //         if(std::strcmp(texture->texturePath.c_str(), path.c_str()) == 0){
+    //             textures.push_back(texture);
+    //             skip = true; 
+    //             break;
+    //         }
+    //     }
 
-        /* Load Texture */
-        if (!skip){
-            Texture2D* newTexture = new Texture2D(path, type);
-            textures.push_back(newTexture);
-            loadedTextures.push_back(newTexture);
-        }
-    }
+    //     /* Load Texture */
+    //     if (!skip){
+    //         Texture2D* newTexture = new Texture2D(path, type);
+    //         textures.push_back(newTexture);
+    //         loadedTextures.push_back(newTexture);
+    //     }
+    //}
     return textures;
 }

@@ -8,6 +8,9 @@
 #include "Camera.h"
 #include "Transform.h"
 
+const std::string SHADERNAME = "default";
+const std::string SHADERPATH = "res/shaders";
+
 class Shader{
 public:
     /**
@@ -15,7 +18,7 @@ public:
      * @param shadersPath is the path of the dir that contains the shaders
      * @param shaderName is the name of the vertexShader and fragmentShader
     */
-    Shader(const std::string& shadersPath, const std::string& shaderName);
+    Shader(const std::string& shaderName = SHADERNAME, const std::string& shadersPath = SHADERPATH);
     ~Shader();
     /* Binds this shader program as the current shader program of OpenGL */
     void bind() const;

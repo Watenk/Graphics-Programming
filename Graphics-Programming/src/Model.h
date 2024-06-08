@@ -14,7 +14,7 @@ class Model{
 public:
     std::vector<Mesh*> meshes;
 
-    Model(const int usage, const std::string path, const Camera* cam);
+    Model(const int usage, const std::string path, Camera* cam);
     Model(std::vector<Mesh*> meshes);
     ~Model();
 
@@ -23,10 +23,11 @@ public:
 private:
     std::string directory;
     std::vector<Texture2D*> loadedTextures; 
+    Camera* cam;
     
     void bind() const;
     void unBind() const;
     void processNode(const int usage, aiNode *node, const aiScene *scene, const Camera* cam);
     Mesh* convertAIMeshToMesh(const int usage, aiMesh *mesh, const aiScene *scene, const Camera* cam);
-    std::vector<Texture2D*> loadTexturesType(aiMaterial *material, TextureType type);
+    std::vector<Texture2D*> loadTexturesType(aiMaterial *material);
 };

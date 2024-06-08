@@ -12,7 +12,7 @@ public:
     Texture2D* heightmap;
     Mesh* mesh;
 
-    Terrain(Texture2D* heightMap, Camera* cam, float heightScale = HEIGHTSCALE, float xzScale = XZSCALE);
+    Terrain(Texture2D* heightMap, float heightScale = HEIGHTSCALE, float xzScale = XZSCALE);
 
 private:
 

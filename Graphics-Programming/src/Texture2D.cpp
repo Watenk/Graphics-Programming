@@ -4,7 +4,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-Texture2D::Texture2D(const std::string& texturePath, TextureType type, const int wrappingMode, const int minimizeFilterMode, const int magnifyFilterMode) : type(type), texturePath(texturePath){
+Texture2D::Texture2D(const std::string& texturePath, const int wrappingMode, const int minimizeFilterMode, const int magnifyFilterMode) : texturePath(texturePath){
 
     stbi_set_flip_vertically_on_load(true);  
 
