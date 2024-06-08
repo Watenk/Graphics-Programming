@@ -7,8 +7,8 @@
 #include <vector>
 
 const std::vector<int> ATTRIBUTES = {
-    // Pos   // Normals   // Tex coords(UV)
-    3,       3,           2,      
+    // Pos   // Normals   // Tex coords(UV)   // Tangents    // BiTangent
+    3,       3,           2,                  3,             3
 };
 
 const std::vector<Texture2D*> TEXTURES = {};

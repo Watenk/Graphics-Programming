@@ -4,6 +4,7 @@ out vec4 FragColor;
 struct Material{
     sampler2D diffuse;
     sampler2D specular;
+    sampler2D normal;
     float shininess;
 }; 
 
@@ -45,6 +46,7 @@ struct SpotLight{
 in vec3 fragPos;
 in vec2 texCoord;
 in vec3 normal;
+in mat3 tbn;
 
 uniform vec3 viewPos;
 uniform DirectionalLight directionalLight;
@@ -61,14 +63,18 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 void main(){
-    vec3 norm = normalize(normal);
+    // Normal 
+    vec3 normal = texture(material.normal, texCoord).rgb;
+    normal = normalize(normal * 2.0 - 1.0);
+    normal = tbn * normal;
+
     vec3 viewDir = normalize(viewPos - fragPos);
 
     // Directional
-    vec3 result = calcDirectionalLight(directionalLight, norm, viewDir);
+    vec3 result = calcDirectionalLight(directionalLight, normal, viewDir);
 
     // Point
-    for(int i = 0; i < activePointLights; i++) result += calcPointLight(pointLights[i], norm, fragPos, viewDir);    
+    for(int i = 0; i < activePointLights; i++) result += calcPointLight(pointLights[i], normal, fragPos, viewDir);    
     
     // Spot
     // for(int i = 0; i < activeSpotLights; i++)
