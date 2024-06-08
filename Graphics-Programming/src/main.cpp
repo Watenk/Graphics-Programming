@@ -11,7 +11,7 @@
 #include "Time.h"
 #include "InputHandler.h"
 #include "PlayerController.h"
-#include "Model.h"
+#include "util/ModelUtil.h"
 #include "lights/lightManager.h"
 #include "Terrain.h"
 #include "GameObject.h"
@@ -27,6 +27,7 @@ void printVec3(glm::vec3 vec3);
 std::vector<float> getCubeVertices();
 std::vector<int> getCubeAttributeLenghts();
 std::vector<unsigned int> getCubeIndices();
+void DrawGameObjects(std::vector<GameObject*> gameObjects);
 
 /* Managers */
 GLFWwindow* window;
@@ -84,13 +85,13 @@ int main(){
     Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices());
 
     /* Mesh Generators */
-    //Model* backpack = new Model(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", cam);
     Transform terrainTransform;
     Terrain* terrain = new Terrain(new Texture2D("res/textures/heightmap.png"), 50.0f);
 
     /* GameObjects */
     GameObject* container = new GameObject(cubeMesh, defaultShader, containerMaterial, cam);
     GameObject* skyBox = new GameObject(cubeMesh, skyboxShader, skyBoxMaterial, cam);
+    std::vector<GameObject*> backpack = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", defaultShader, cam);
 
     /* Scene */
     skyBox->transform.setParent(cam->transform);
@@ -129,6 +130,7 @@ int main(){
         container->draw();
         //backpack->draw(defaultShader);
         terrain->mesh->draw(terrainTransform, defaultShader, terrainMaterial, cam);
+        DrawGameObjects(backpack);
 
         // Draw end -------------
 
@@ -176,6 +178,12 @@ int initGLFW(GLFWwindow* &window){
         return -2;
     }
     return 0;
+}
+
+void DrawGameObjects(std::vector<GameObject*> gameObjects){
+    for (GameObject* gameObject : gameObjects){
+        gameObject->draw();
+    }
 }
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height){
