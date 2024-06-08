@@ -11,10 +11,10 @@
 #include "Time.h"
 #include "InputHandler.h"
 #include "PlayerController.h"
-#include "util/ModelUtil.h"
 #include "lights/lightManager.h"
-#include "Terrain.h"
 #include "GameObject.h"
+#include "util/ModelUtil.h"
+#include "util/TerrainUtil.h"
 
 const char* WINDOWNAME = "Unreal Engine 6";
 const unsigned int WINDOWWIDTH = 1280;
@@ -84,13 +84,10 @@ int main(){
     /* Meshes */
     Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices());
 
-    /* Mesh Generators */
-    Transform terrainTransform;
-    Terrain* terrain = new Terrain(new Texture2D("res/textures/heightmap.png"), 50.0f);
-
     /* GameObjects */
     GameObject* container = new GameObject(cubeMesh, defaultShader, containerMaterial, cam);
     GameObject* skyBox = new GameObject(cubeMesh, skyboxShader, skyBoxMaterial, cam);
+    GameObject* terrain = TerrainUtil::generateTerrain(new Texture2D("res/textures/heightmap.png"), 50.0f, 1.0f, defaultShader, terrainMaterial, cam);
     std::vector<GameObject*> backpack = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", defaultShader, cam);
 
     /* Scene */
@@ -128,8 +125,7 @@ int main(){
 	    glEnable(GL_DEPTH);
 
         container->draw();
-        //backpack->draw(defaultShader);
-        terrain->mesh->draw(terrainTransform, defaultShader, terrainMaterial, cam);
+        terrain->draw();
         DrawGameObjects(backpack);
 
         // Draw end -------------

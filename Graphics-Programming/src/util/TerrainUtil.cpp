@@ -1,15 +1,13 @@
-#include "Terrain.h"
+#include "TerrainUtil.h"
 
 #include <glm/glm.hpp>
 #include <vector>
 #include <iostream>
 
-Terrain::Terrain(Texture2D* heightmap, float heightScale, float xzScale) : heightmap(heightmap){
+GameObject* TerrainUtil::generateTerrain(Texture2D* heightmap, float heightScale, float xzScale, Shader* shader, Material* material, Camera* cam){
     
     int verticesAmount = heightmap->width * heightmap->height;
     int indicesAmount = (heightmap->width - 1) * (heightmap->height - 1);
-
-    std::cout << "Loading Terrain of size (" << heightmap->width << ", " << heightmap->height << ")" << " with texture " << heightmap->texturePath << " and " << heightmap->channels << " channel(s)." << std::endl;
 
     /* Vertices */
     std::vector<float> vertices;
@@ -68,6 +66,6 @@ Terrain::Terrain(Texture2D* heightmap, float heightScale, float xzScale) : heigh
     textures.push_back(heightmap);
     textures.push_back(heightmapSpecular);
 
-    std::cout << "Generated terrain with " << vertices.size() / 8 << " vertices and " << indices.size() / 6 << " indices" << std::endl;
-    mesh = new Mesh(GL_STATIC_DRAW, vertices, indices);
+    Mesh* mesh = new Mesh(GL_STATIC_DRAW, vertices, indices);
+    return new GameObject(mesh, shader, material, cam);
 }
