@@ -83,8 +83,8 @@ int main(){
     //terrainMaterial->specularTexture = new Texture2D("res/textures/terrain/heightmap.png");
     terrainMaterial->normalTexture = new Texture2D("res/textures/terrain/heightmapNormal.png");
     terrainMaterial->shininess = 0.0f;
-    terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/sand.jpg"));
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/dirt.jpg"));
+    terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/sand.jpg"));
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/grass.png"));
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/rock.jpg"));
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/snow.jpg"));
@@ -95,7 +95,7 @@ int main(){
     /* GameObjects */
     GameObject* container = new GameObject(cubeMesh, defaultShader, containerMaterial, cam);
     GameObject* skyBox = new GameObject(cubeMesh, skyboxShader, skyBoxMaterial, cam);
-    GameObject* terrain = TerrainUtil::generateTerrain(new Texture2D("res/textures/heightmap.png"), 50.0f, 1.0f, terrainShader, terrainMaterial, cam);
+    GameObject* terrain = TerrainUtil::generateTerrain(new Texture2D("res/textures/heightmap.png"), 250.0f, 5.0f, terrainShader, terrainMaterial, cam);
     //std::vector<GameObject*> backpack = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", defaultShader, cam);
 
     /* Scene */

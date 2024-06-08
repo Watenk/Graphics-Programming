@@ -68,6 +68,7 @@ void calcPhong(Phong phong, vec3 normal, vec3 viewDir, vec3 lightDirection, out 
 vec3 calcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+vec3 lerp(vec3 a, vec3 b, float t);
 
 void main(){
     // Normal 
@@ -89,7 +90,8 @@ void main(){
     // for(int i = 0; i < activeSpotLights; i++)
     //     result += calcSpotLight(spotLights[i], norm, fragPos, viewDir);    
     
-    FragColor = vec4(result, 1.0);
+
+    FragColor = texture(extraTextures.extra2, texCoord) * vec4(result, 1.0);
 }
 
 // This function calculates the phong light colors of: Ambient, Diffuse and specular
@@ -98,8 +100,20 @@ void calcPhong(Phong phong, vec3 normal, vec3 viewDir, vec3 lightDirection, out 
     ambientColor = phong.ambient * vec3(texture(material.diffuse, texCoord)); // Read texture uv and multiply it with light.ambientStrenght
     
     // Diffuse
-    float diffuseIntensity = max(dot(normal, lightDirection), 0.0); // Calc the angle (dot product) of the normal and the lightDirection and cutting off negatives with max()
-    diffuseColor = phong.diffuse * diffuseIntensity * vec3(texture(extraTextures.extra0, texCoord)); // Read texture uv and multiply it with light.diffuseStrenght and diffuseIntensity
+    // float diffuseIntensity = max(dot(normal, lightDirection), 0.0); // Calc the angle (dot product) of the normal and the lightDirection and cutting off negatives with max()
+    // diffuseColor = phong.diffuse * diffuseIntensity * vec3(texture(material.diffuse, texCoord)); // Read texture uv and multiply it with light.diffuseStrenght and diffuseIntensity
+    float ds = clamp((fragPos.y - 50) / 10, -1, 1) * 0.5 + 0.5;
+    float sg = clamp((fragPos.y - 100) / 10, -1, 1) * 0.5 + 0.5;
+    float gr = clamp((fragPos.y - 150) / 10, -1, 1) * 0.5 + 0.5;
+    float rs = clamp((fragPos.y - 200) / 10, -1, 1) * 0.5 + 0.5;
+
+    vec3 dirtColor = texture(extraTextures.extra0, texCoord * 10).rgb;
+    vec3 sandColor = texture(extraTextures.extra1, texCoord * 10).rgb;
+    vec3 grassColor = texture(extraTextures.extra2, texCoord * 10).rgb;
+    vec3 stoneColor = texture(extraTextures.extra3, texCoord * 10).rgb;
+    vec3 snowColor = texture(extraTextures.extra4, texCoord * 10).rgb;
+
+    diffuseColor = lerp(lerp(lerp(lerp(dirtColor, sandColor, ds), grassColor, sg), stoneColor, gr), snowColor, rs);
 
     // Specular
     vec3 reflectDirection = reflect(-lightDirection, normal);
@@ -145,4 +159,8 @@ vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir){
     calcPhong(light.phong, normal, viewDir, lightDirection, ambientColor, diffuseColor, specularColor);
 
     return (ambientColor + diffuseColor + specularColor);
+}
+
+vec3 lerp(vec3 a, vec3 b, float t){
+    return a + (b - a) * t;
 }

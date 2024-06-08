@@ -89,14 +89,14 @@ void Mesh::draw(Transform transform, Shader* shader, Material* material, Camera*
         int extraCount = 0;
         for (Texture2D* texture : material->extraTextures){
             glActiveTexture(GL_TEXTURE0 + extraIndex);
-            shader->setInt("extraTextures.extra" + extraCount, extraIndex);
+            shader->setInt(("extraTextures.extra" + std::to_string(extraCount)).c_str(), extraIndex);
             texture->bind();
             extraCount++;
             extraIndex++;
         }
     }
 
-    shader->setFloat("material.shininess", 64.0f);
+    shader->setFloat("material.shininess", material->shininess);
 
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 }
