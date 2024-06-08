@@ -64,17 +64,18 @@ vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 void main(){
     // Normal 
-    vec3 normal = texture(material.normal, texCoord).rgb;
-    normal = normalize(normal * 2.0 - 1.0);
-    normal = tbn * normal;
+    // vec3 norm = texture(material.normal, texCoord).rgb;
+    // norm = normalize(norm * 2.0 - 1.0);
+    // norm = tbn * norm;
+    vec3 norm = normalize(normal);
 
     vec3 viewDir = normalize(viewPos - fragPos);
 
     // Directional
-    vec3 result = calcDirectionalLight(directionalLight, normal, viewDir);
+    vec3 result = calcDirectionalLight(directionalLight, norm, viewDir);
 
     // Point
-    for(int i = 0; i < activePointLights; i++) result += calcPointLight(pointLights[i], normal, fragPos, viewDir);    
+    for(int i = 0; i < activePointLights; i++) result += calcPointLight(pointLights[i], norm, fragPos, viewDir);    
     
     // Spot
     // for(int i = 0; i < activeSpotLights; i++)

@@ -18,7 +18,7 @@ DirectionalLight LightManager::getDirectionalLight(){
 // }
 
 void LightManager::addShader(Shader* shader){
-    //shaders.push_back(shader);
+    shaders.push_back(shader);
     updateShaderDirectional(shader);
     // for (PointLight light : pointLights){
     //     updateShaderPoint(shader, light);

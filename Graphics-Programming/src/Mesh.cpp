@@ -66,13 +66,35 @@ void Mesh::draw(Transform transform, Shader* shader, Material* material, Camera*
     int diffuseIndex = 0;
     glActiveTexture(GL_TEXTURE0 + diffuseIndex);
     shader->setInt("material.diffuse", diffuseIndex);
-    material->diffuseTexture->bind();
-
+    if (material->diffuseTexture != nullptr) material->diffuseTexture->bind();
+    else glBindTexture(GL_TEXTURE_2D, 0);
+    
     /* Specular */
     int specularIndex = 1;
     glActiveTexture(GL_TEXTURE0 + specularIndex);
     shader->setInt("material.specular", specularIndex);
-    material->specularTexture->bind();
+    if (material->specularTexture != nullptr) material->specularTexture->bind();
+    else glBindTexture(GL_TEXTURE_2D, 0);
+    
+    /* Normal */
+    int normalIndex = 2;
+    glActiveTexture(GL_TEXTURE0 + normalIndex);
+    shader->setInt("material.normal", normalIndex);
+    if (material->normalTexture != nullptr) material->normalTexture->bind();
+    else glBindTexture(GL_TEXTURE_2D, 0);
+
+    /* Extra Textures */
+    if (material->extraTextures.size() > 0){
+        int extraIndex = 3;
+        int extraCount = 0;
+        for (Texture2D* texture : material->extraTextures){
+            glActiveTexture(GL_TEXTURE0 + extraIndex);
+            shader->setInt("extraTextures.extra" + extraCount, extraIndex);
+            texture->bind();
+            extraCount++;
+            extraIndex++;
+        }
+    }
 
     shader->setFloat("material.shininess", 64.0f);
 

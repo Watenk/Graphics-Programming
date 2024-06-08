@@ -14,7 +14,7 @@ std::vector<GameObject*> ModelUtil::models;
 std::vector<GameObject*> ModelUtil::loadModel(const int usage, const std::string path, Shader* shader, Camera* cam){
     /* Read the model */
     Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_OptimizeMeshes);	
+    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace);	
 	
     /* Error check */
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -57,15 +57,34 @@ GameObject* ModelUtil::convertAIMeshToGameObject(const int usage, aiMesh *aiMesh
         vertices.push_back(aiMesh->mNormals[i].y);
         vertices.push_back(aiMesh->mNormals[i].z);
 
-        /* Texture cord */
         if(aiMesh->mTextureCoords[0]){ // if mesh contains texture coordinates
+            /* Texture cord */
             vertices.push_back(aiMesh->mTextureCoords[0][i].x); 
             vertices.push_back(aiMesh->mTextureCoords[0][i].y);
+
+            /* Tangent */
+            vertices.push_back(aiMesh->mTangents[i].x);
+            vertices.push_back(aiMesh->mTangents[i].y);
+            vertices.push_back(aiMesh->mTangents[i].z);
+
+            /* BiTangent */
+            vertices.push_back(aiMesh->mBitangents[i].x);
+            vertices.push_back(aiMesh->mBitangents[i].y);
+            vertices.push_back(aiMesh->mBitangents[i].z);
         }
         else{
             vertices.push_back(0.0f);
             vertices.push_back(0.0f);
+
+            vertices.push_back(0.0f);
+            vertices.push_back(0.0f);
+            vertices.push_back(0.0f);
+
+            vertices.push_back(0.0f);
+            vertices.push_back(0.0f);
+            vertices.push_back(0.0f);
         }
+
     }
 
     /* Convert Indices */
@@ -90,6 +109,11 @@ GameObject* ModelUtil::convertAIMeshToGameObject(const int usage, aiMesh *aiMesh
         std::vector<Texture2D*> specularMaps = loadTexturesType(aiMaterial, aiTextureType_SPECULAR);
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
         material->specularTexture = textures[1];
+
+        /* Normal Maps */
+        std::vector<Texture2D*> heightMaps = loadTexturesType(aiMaterial, aiTextureType_HEIGHT);
+        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+        material->normalTexture = textures[2];
     }  
 
     Mesh* mesh = new Mesh(usage, vertices, indices);

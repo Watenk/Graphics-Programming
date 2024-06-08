@@ -1,52 +1,51 @@
 #version 330 core
 out vec4 FragColor;
 
-struct Material{
-    // Light Maps
-    sampler2D diffuse0;
-    sampler2D specular0;
+struct ExtraTextures{
+    sampler2D extra0;
+    sampler2D extra1;
+    sampler2D extra2;
+    sampler2D extra3;
+    sampler2D extra4;
+};
 
+struct Material{
+    sampler2D diffuse;
+    sampler2D specular;
+    sampler2D normal;
     float shininess;
 }; 
 
 struct Phong{
-    vec3 ambientStrenght;
-    vec3 diffuseStrenght;
-    vec3 specularStrenght;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+struct Attenutation{
+    float constant;
+    float linear;
+    float quadratic;
 };
 
 struct DirectionalLight{
-    // Directional
     vec3 direction;
-	
     Phong phong;
 };
 
 struct PointLight{
-    // Point
     vec3 position;
-    
     Phong phong;
-
-    // Attenutation
-    float constant;
-    float linear;
-    float quadratic;
+    Attenutation attenuation;
 };
 
 struct SpotLight{
-    // Spot
     vec3 position;
     vec3 direction;
     float cutOff;
     float outerCutOff;
-  
     Phong phong;
-
-    // Attenutation
-    float constant;
-    float linear;
-    float quadratic;
+    Attenutation attenuation;
 };
 
 #define MAX_POINT_LIGHTS 16
@@ -54,7 +53,6 @@ struct SpotLight{
 
 in vec3 fragPos;
 in vec2 texCoord;
-in vec3 normal;
 
 uniform vec3 viewPos;
 uniform DirectionalLight directionalLight;
@@ -63,6 +61,7 @@ uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 uniform Material material;
 uniform int activePointLights;
 uniform int activeSpotLights;
+uniform ExtraTextures extraTextures;
 
 // Prototypes
 void calcPhong(Phong phong, vec3 normal, vec3 viewDir, vec3 lightDirection, out vec3 ambientColor, out vec3 diffuseColor, out vec3 specularColor);
@@ -71,14 +70,20 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 void main(){
-    vec3 norm = normalize(normal);
+    // Normal 
+    vec3 norm = texture(material.normal, texCoord).rgb;
+    norm = normalize(norm * 2.0 - 1.0);
+    norm.gb = norm.bg;
+    norm.r = -norm.r;
+    norm.b = -norm.b;
+
     vec3 viewDir = normalize(viewPos - fragPos);
 
     // Directional
     vec3 result = calcDirectionalLight(directionalLight, norm, viewDir);
 
     // Point
-    for(int i = 0; i < activePointLights; i++) result += calcPointLight(pointLights[i], norm, fragPos, viewDir);    
+    //for(int i = 0; i < activePointLights; i++) result += calcPointLight(pointLights[i], norm, fragPos, viewDir);    
     
     // Spot
     // for(int i = 0; i < activeSpotLights; i++)
@@ -90,16 +95,16 @@ void main(){
 // This function calculates the phong light colors of: Ambient, Diffuse and specular
 void calcPhong(Phong phong, vec3 normal, vec3 viewDir, vec3 lightDirection, out vec3 ambientColor, out vec3 diffuseColor, out vec3 specularColor){
     // Ambient
-    ambientColor = phong.ambientStrenght * vec3(texture(material.diffuse0, texCoord)); // Read texture uv and multiply it with light.ambientStrenght
+    ambientColor = phong.ambient * vec3(texture(material.diffuse, texCoord)); // Read texture uv and multiply it with light.ambientStrenght
     
     // Diffuse
     float diffuseIntensity = max(dot(normal, lightDirection), 0.0); // Calc the angle (dot product) of the normal and the lightDirection and cutting off negatives with max()
-    diffuseColor = phong.diffuseStrenght * diffuseIntensity * vec3(texture(material.diffuse0, texCoord)); // Read texture uv and multiply it with light.diffuseStrenght and diffuseIntensity
+    diffuseColor = phong.diffuse * diffuseIntensity * vec3(texture(extraTextures.extra0, texCoord)); // Read texture uv and multiply it with light.diffuseStrenght and diffuseIntensity
 
     // Specular
     vec3 reflectDirection = reflect(-lightDirection, normal);
     float specularIntensity = pow(max(dot(viewDir, reflectDirection), 0.0), material.shininess);
-    specularColor = phong.specularStrenght * specularIntensity * vec3(texture(material.specular0, texCoord)); // Read texture uv and multiply it with light.specularStrenght and diffuseIntensity
+    specularColor = phong.specular * specularIntensity * vec3(texture(material.specular, texCoord)); // Read texture uv and multiply it with light.specularStrenght and diffuseIntensity
 }
 
 vec3 calcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir){
@@ -123,7 +128,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir){
 
     // attenuation (light becomes less intense at a distance)
     float distance = length(light.position - fragPos);
-    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
+    float attenuation = 1.0 / (light.attenuation.constant + light.attenuation.linear * distance + light.attenuation.quadratic * (distance * distance));    
     ambientColor *= attenuation;
     diffuseColor *= attenuation;
     specularColor *= attenuation;

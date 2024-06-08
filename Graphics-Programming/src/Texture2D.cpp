@@ -4,7 +4,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-Texture2D::Texture2D(const std::string& texturePath, const int wrappingMode, const int minimizeFilterMode, const int magnifyFilterMode) : texturePath(texturePath){
+Texture2D::Texture2D(const std::string& texturePath, const int channelAmount, const int wrappingMode, const int minimizeFilterMode, const int magnifyFilterMode) : texturePath(texturePath){
 
     stbi_set_flip_vertically_on_load(true);  
 
@@ -23,6 +23,7 @@ Texture2D::Texture2D(const std::string& texturePath, const int wrappingMode, con
     data = stbi_load(texturePath.c_str(), &width, &height, &channels, 0);
     if (data){
         GLenum format;
+        if (channelAmount != 0) channels = channelAmount; // Use hardCoded Channel amount
         if (channels == 1)
             format = GL_RED;
         else if (channels == 3)

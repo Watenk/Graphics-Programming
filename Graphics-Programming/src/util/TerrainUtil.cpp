@@ -66,6 +66,11 @@ GameObject* TerrainUtil::generateTerrain(Texture2D* heightmap, float heightScale
     textures.push_back(heightmap);
     textures.push_back(heightmapSpecular);
 
-    Mesh* mesh = new Mesh(GL_STATIC_DRAW, vertices, indices);
+    const std::vector<int> attributes = {
+       // Pos   // Normals   // Tex coords(UV) 
+       3,       3,           2,         
+    };
+
+    Mesh* mesh = new Mesh(GL_STATIC_DRAW, vertices, indices, attributes);
     return new GameObject(mesh, shader, material, cam);
 }

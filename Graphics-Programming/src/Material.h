@@ -9,7 +9,9 @@ struct Material{
     Texture2D* specularTexture;
     Texture2D* normalTexture;
 
+    std::vector<Texture2D*> extraTextures;
+
     float shininess;
 
-    Material() : diffuseTexture(new Texture2D("res/textures/smile.png")), specularTexture(new Texture2D("res/textures/smile.png")), normalTexture(new Texture2D("res/textures/smile.png")) {}
+    Material() : diffuseTexture(nullptr), specularTexture(nullptr), normalTexture(nullptr) {}
 };

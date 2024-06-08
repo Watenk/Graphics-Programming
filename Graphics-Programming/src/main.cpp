@@ -63,9 +63,11 @@ int main(){
     /* Shaders */
     Shader* defaultShader = new Shader();
     Shader* skyboxShader = new Shader("skybox");
+    Shader* terrainShader = new Shader("terrain");
 
     /* Lights */
     lightManager->addShader(defaultShader);
+    lightManager->addShader(terrainShader);
 
     /* Materials */
     Material* skyBoxMaterial = new Material();
@@ -77,18 +79,24 @@ int main(){
     containerMaterial->shininess = 64.0f;
 
     Material* terrainMaterial = new Material();
-    terrainMaterial->diffuseTexture = new Texture2D("res/textures/heightmap.png");
-    terrainMaterial->specularTexture = new Texture2D("res/textures/heightmap.png");
-    terrainMaterial->shininess = 64.0f;
+    terrainMaterial->diffuseTexture = new Texture2D("res/textures/terrain/heightmap.png");
+    //terrainMaterial->specularTexture = new Texture2D("res/textures/terrain/heightmap.png");
+    terrainMaterial->normalTexture = new Texture2D("res/textures/terrain/heightmapNormal.png");
+    terrainMaterial->shininess = 0.0f;
+    terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/sand.jpg"));
+    terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/dirt.jpg"));
+    terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/grass.png"));
+    terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/rock.jpg"));
+    terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/snow.jpg"));
 
-    /* Meshes */
+    /* Manual Meshes */
     Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices());
 
     /* GameObjects */
     GameObject* container = new GameObject(cubeMesh, defaultShader, containerMaterial, cam);
     GameObject* skyBox = new GameObject(cubeMesh, skyboxShader, skyBoxMaterial, cam);
-    GameObject* terrain = TerrainUtil::generateTerrain(new Texture2D("res/textures/heightmap.png"), 50.0f, 1.0f, defaultShader, terrainMaterial, cam);
-    std::vector<GameObject*> backpack = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", defaultShader, cam);
+    GameObject* terrain = TerrainUtil::generateTerrain(new Texture2D("res/textures/heightmap.png"), 50.0f, 1.0f, terrainShader, terrainMaterial, cam);
+    //std::vector<GameObject*> backpack = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", defaultShader, cam);
 
     /* Scene */
     skyBox->transform.setParent(cam->transform);
@@ -101,13 +109,18 @@ int main(){
         input->update(window);
         watenkTime->update();
 
+        DirectionalLight dirLight = lightManager->getDirectionalLight();
+        dirLight.direction = glm::normalize(glm::vec3(glm::sin(glfwGetTime()), 0.5f, glm::cos(glfwGetTime())));
+        lightManager->setDirectionalLight(dirLight);
+
         /* Uniform Updates */
         defaultShader->setVec3("viewPos", cam->transform->getPosition());
         skyboxShader->setVec3("viewPos", cam->transform->getPosition());
         skyboxShader->setVec3("lightDirection", lightManager->getDirectionalLight().direction);
+        terrainShader->setVec3("viewPos", cam->transform->getPosition());
 
         /* GameObject Updates */
-        container->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
+        //container->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
 
         /* Buffers */
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -115,18 +128,15 @@ int main(){
 
         // Draw ----------------
         
-        /* Skybox */
 	    glDisable(GL_CULL_FACE);
 	    glDisable(GL_DEPTH_TEST);
-	    glDisable(GL_DEPTH);
         skyBox->draw();
         glEnable(GL_CULL_FACE);
 	    glEnable(GL_DEPTH_TEST);
-	    glEnable(GL_DEPTH);
 
         container->draw();
         terrain->draw();
-        DrawGameObjects(backpack);
+        //DrawGameObjects(backpack);
 
         // Draw end -------------
 
