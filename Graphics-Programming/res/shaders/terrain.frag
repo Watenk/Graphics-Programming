@@ -35,6 +35,7 @@ struct DirectionalLight{
 
 struct PointLight{
     vec3 position;
+    vec3 color;
     Phong phong;
     Attenutation attenuation;
 };
@@ -85,11 +86,10 @@ void main(){
     vec3 result = calcDirectionalLight(directionalLight, normal, viewDir);
 
     // Point
-    //for(int i = 0; i < activePointLights; i++) result += calcPointLight(pointLights[i], norm, fragPos, viewDir);    
+    for(int i = 0; i < activePointLights; i++) result += calcPointLight(pointLights[i], normal, fragPos, viewDir);    
     
     // Spot
-    // for(int i = 0; i < activeSpotLights; i++)
-    //     result += calcSpotLight(spotLights[i], norm, fragPos, viewDir);    
+    // for(int i = 0; i < activeSpotLights; i++) result += calcSpotLight(spotLights[i], norm, fragPos, viewDir);    
 
     FragColor = vec4(result, 1.0);
 }
@@ -167,9 +167,9 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir){
     // attenuation (light becomes less intense at a distance)
     float distance = length(light.position - fragPos);
     float attenuation = 1.0 / (light.attenuation.constant + light.attenuation.linear * distance + light.attenuation.quadratic * (distance * distance));    
-    ambientColor *= attenuation;
-    diffuseColor *= attenuation;
-    specularColor *= attenuation;
+    ambientColor *= attenuation * light.color;
+    diffuseColor *= attenuation * light.color;
+    specularColor *= attenuation * light.color;
 
     return (ambientColor + diffuseColor + specularColor);
 } 

@@ -9,9 +9,9 @@ DirectionalLight LightManager::getDirectionalLight(){
     return directionalLight;
 }
 
-// int Lights::getPointLightSize(){
-//     return pointLights.size();
-// }
+int LightManager::getPointLightAmount(){
+    return pointLights.size();
+}
 
 // int Lights::getSpotLightSize(){
 //     return spotLights.size();
@@ -20,9 +20,10 @@ DirectionalLight LightManager::getDirectionalLight(){
 void LightManager::addShader(Shader* shader){
     shaders.push_back(shader);
     updateShaderDirectional(shader);
-    // for (PointLight light : pointLights){
-    //     updateShaderPoint(shader, light);
-    // }
+
+    for (PointLight light : pointLights){
+        updateShaderPoint(shader, light);
+    }
     // for (SpotLight light : spotLights){
     //     updateShaderSpot(shader, light);
     // }
@@ -35,14 +36,15 @@ void LightManager::setDirectionalLight(DirectionalLight newDirectionalLight){
     }
 }
 
-// void Lights::addPointLight(PointLight pointLight){
-//     pointLight.index = pointLights.size();
+void LightManager::addPointLight(PointLight pointLight){
+    pointLight.index = pointLights.size();
+    pointLights.push_back(pointLight);
 
-//     for (Shader* shader : shaders){
-//         shader->setInt("activePointLights", pointLights.size());
-//         updateShaderPoint(shader, pointLight);
-//     }
-// }
+    for (Shader* shader : shaders){
+        shader->setInt("activePointLights", pointLights.size());
+        updateShaderPoint(shader, pointLight);
+    }
+}
 
 // void Lights::addSpotLight(SpotLight spotLight){
 //     int index = freeSpotIndexes.front();
@@ -56,24 +58,24 @@ void LightManager::setDirectionalLight(DirectionalLight newDirectionalLight){
 //     }
 // }
 
-// void Lights::removePointLight(PointLight pointLight){
-//     auto it = std::find_if(pointLights.begin(), pointLights.end(), [&pointLight](const PointLight& light) { return light.index == pointLight.index; });
-//     if (it != pointLights.end()) {
-//         int removedIndex = it - pointLights.begin();
-//         pointLights.erase(it); 
+void LightManager::removePointLight(PointLight pointLight){
+    auto it = std::find_if(pointLights.begin(), pointLights.end(), [&pointLight](const PointLight& light) { return light.index == pointLight.index; });
+    if (it != pointLights.end()) {
+        int removedIndex = it - pointLights.begin();
+        pointLights.erase(it); 
 
-//         for (PointLight light : pointLights) {
-//             if (light.index > removedIndex) {
-//                 light.index--;
+        for (PointLight light : pointLights) {
+            if (light.index > removedIndex) {
+                light.index--;
                 
-//                 for (Shader* shader : shaders){
-//                     shader->setInt("activePointLights", pointLights.size());
-//                     updateShaderPoint(shader, light);
-//                 }
-//             }
-//         }
-//     }
-// }
+                for (Shader* shader : shaders){
+                    shader->setInt("activePointLights", pointLights.size());
+                    updateShaderPoint(shader, light);
+                }
+            }
+        }
+    }
+}
 
 // void Lights::removeSpotLight(SpotLight spotLight){
 //     freeSpotIndexes.push_back(spotLight.index);
@@ -93,21 +95,22 @@ void LightManager::updateShaderDirectional(Shader* shader){
     shader->setVec3("directionalLight.phong.specular", directionalLight.phong.specular);
 }
 
-// void Lights::updateShaderSpots(Shader* shader){
+// void LightManager::updateShaderSpots(Shader* shader){
 //     for (SpotLight light : spotLights){
 //         updateShaderSpot(shader, light);
 //     }
 // }
 
-// void Lights::updateShaderPoint(Shader* shader, PointLight light){
-//     shader->setVec3(("pointLights[" + std::to_string(light.index) + "].position").c_str(), light.position);
-//     shader->setVec3(("pointLights[" + std::to_string(light.index) + "].phong.ambient").c_str(), light.phong.ambient);
-//     shader->setVec3(("pointLights[" + std::to_string(light.index) + "].phong.diffuse").c_str(), light.phong.diffuse);
-//     shader->setVec3(("pointLights[" + std::to_string(light.index) + "].phong.specular").c_str(), light.phong.specular);
-//     shader->setFloat(("pointLights[" + std::to_string(light.index) + "].attenuation.constant").c_str(), light.constant);
-//     shader->setFloat(("pointLights[" + std::to_string(light.index) + "].attenuation.linear").c_str(), light.linear);
-//     shader->setFloat(("pointLights[" + std::to_string(light.index) + "].attenuation.quadratic").c_str(), light.quadratic);
-// }
+void LightManager::updateShaderPoint(Shader* shader, PointLight light){
+    shader->setVec3(("pointLights[" + std::to_string(light.index) + "].position").c_str(), light.position);
+    shader->setVec3(("pointLights[" + std::to_string(light.index) + "].color").c_str(), light.color);
+    shader->setVec3(("pointLights[" + std::to_string(light.index) + "].phong.ambient").c_str(), light.phong.ambient);
+    shader->setVec3(("pointLights[" + std::to_string(light.index) + "].phong.diffuse").c_str(), light.phong.diffuse);
+    shader->setVec3(("pointLights[" + std::to_string(light.index) + "].phong.specular").c_str(), light.phong.specular);
+    shader->setFloat(("pointLights[" + std::to_string(light.index) + "].attenuation.constant").c_str(), light.attenuation.constant);
+    shader->setFloat(("pointLights[" + std::to_string(light.index) + "].attenuation.linear").c_str(), light.attenuation.linear);
+    shader->setFloat(("pointLights[" + std::to_string(light.index) + "].attenuation.quadratic").c_str(), light.attenuation.quadratic);
+}
 
 // void Lights::updateShaderSpot(Shader* shader, SpotLight light){
 //     shader->setVec3(("spotLights[" + std::to_string(light.index) + "].position").c_str(), light.position);

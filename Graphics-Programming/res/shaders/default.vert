@@ -17,12 +17,11 @@ uniform mat4 projection;
 void main(){
 	fragPos = vec3(model * vec4(aPos, 1.0));
 	texCoord = aTexCoord;
-	//vec3 n = mat3(transpose(inverse(model))) * aNormal; // Inversing matrices is a costly operation. Better to calculate the normal matrix on the CPU
+	normal = mat3(transpose(inverse(model))) * aNormal; // Inversing matrices is a costly operation. Better to calculate the normal matrix on the CPU
 	vec3 n = normalize(mat3(model) * aNormal);
 	vec3 t = normalize(mat3(model) * aTangent);
 	vec3 b = normalize(mat3(model) * aBiTangent);
 	tbn = mat3(t, b, n);
-	normal = aNormal;
 
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
 }

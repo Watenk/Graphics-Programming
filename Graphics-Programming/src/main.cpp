@@ -67,12 +67,11 @@ int main(){
     Shader* defaultShader = new Shader();
     Shader* skyboxShader = new Shader("skybox");
     Shader* terrainShader = new Shader("terrain");
-
-    /* Lights */
-    lightManager->addShader(defaultShader);
-    lightManager->addShader(terrainShader);
+    Shader* blueLightShader = new Shader("color");
 
     /* Materials */
+    Material* emptyMaterial = new Material();
+
     Material* skyBoxMaterial = new Material();
     skyBoxMaterial->shininess = 64.0f;
 
@@ -83,20 +82,21 @@ int main(){
 
     Material* terrainMaterial = new Material();
     terrainMaterial->diffuseTexture = new Texture2D("res/textures/terrain/heightmap.png");
-    //terrainMaterial->specularTexture = new Texture2D("res/textures/terrain/heightmap.png");
+    terrainMaterial->specularTexture = new Texture2D("res/textures/terrain/heightmap.png");
     terrainMaterial->normalTexture = new Texture2D("res/textures/terrain/heightmapNormal.png");
-    terrainMaterial->shininess = 0.0f;
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/dirt.jpg"));
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/sand.jpg"));
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/grass.png"));
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/rock.jpg"));
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/snow.jpg"));
+    terrainMaterial->shininess = 0.0f;
 
     /* Manual Meshes */
     Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices());
 
     /* GameObjects */
     GameObject* container = new GameObject(cubeMesh, defaultShader, containerMaterial, cam);
+    GameObject* blueLightGameObject = new GameObject(cubeMesh, blueLightShader, emptyMaterial, cam);
     GameObject* skyBox = new GameObject(cubeMesh, skyboxShader, skyBoxMaterial, cam);
     GameObject* terrain = TerrainUtil::generateTerrain(new Texture2D("res/textures/heightmap.png"), 50.0f, 1.0f, terrainShader, terrainMaterial, cam);
     std::vector<GameObject*> backpack = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", defaultShader, cam, 64.0f);
@@ -114,6 +114,18 @@ int main(){
     placeGameObjects(backpack, glm::vec3(90, 7, 90));
     orientateGameObjects(backpack, glm::vec3(-90, 200, 0));
     sizeGameObjects(backpack, glm::vec3(0.5f));
+    blueLightGameObject->transform.setPosition(glm::vec3(95, 5, 95));
+    blueLightGameObject->transform.setSize(glm::vec3(0.5f));
+    blueLightShader->setVec3("color", glm::vec3(0.0f, 0.0f, 1.0f));
+    
+    /* Lights */
+    lightManager->addShader(defaultShader);
+    lightManager->addShader(terrainShader);
+
+    PointLight blueLight;
+    blueLight.color = glm::vec3(0.0f, 0.0f, 1.0f);
+    blueLight.position = blueLightGameObject->transform.getPosition();
+    lightManager->addPointLight(blueLight);
     
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
@@ -149,6 +161,7 @@ int main(){
 
         container->draw();
         terrain->draw();
+        blueLightGameObject->draw();
         DrawGameObjects(backpack);
         DrawGameObjects(tree);
         DrawGameObjects(cat);
