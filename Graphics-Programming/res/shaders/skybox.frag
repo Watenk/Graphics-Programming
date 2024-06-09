@@ -25,7 +25,7 @@ void main()
 	vec3 viewDirection = normalize(fragPos.xyz - viewPos);
 	float sun = max(pow(dot(viewDirection, normalize(lightDirection)), material.shininess), 0.0f);
 
-	FragColor = vec4(lerp(bottomColor, topColor, abs(viewDirection.y)) + sun * sunColor, 1.0f);
+	FragColor = vec4(lerp(bottomColor, topColor, max(viewDirection.y, 0.0)) + sun * sunColor, 1.0f);
 }
 
 vec3 normalizeRGB(vec3 rgb){

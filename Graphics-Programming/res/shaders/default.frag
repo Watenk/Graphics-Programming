@@ -49,6 +49,7 @@ in vec3 normal;
 in mat3 tbn;
 
 uniform vec3 viewPos;
+
 uniform DirectionalLight directionalLight;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
@@ -61,6 +62,8 @@ void calcPhong(Phong phong, vec3 normal, vec3 viewDir, vec3 lightDirection, out 
 vec3 calcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+vec3 lerp(vec3 a, vec3 b, float t);
+vec3 normalizeRGB(vec3 rgb);
 
 void main(){
     // Normal 
@@ -89,9 +92,17 @@ void calcPhong(Phong phong, vec3 normal, vec3 viewDir, vec3 lightDirection, out 
     // Ambient
     ambientColor = phong.ambient * vec3(texture(material.diffuse, texCoord)); // Read texture uv and multiply it with light.ambientStrenght
     
+    // Fog
+    float dist = length(fragPos - viewPos);
+    float fog = pow(clamp((dist - 50) / 200, 0, 1), 2);
+    vec3 skyTopColor = normalizeRGB(vec3(68.0f, 118.0f, 189.0f));
+	vec3 skyBottomColor = normalizeRGB(vec3(188.0f, 214.0f, 231.0f));
+    vec3 fogColor = lerp(skyBottomColor, skyTopColor, max(viewDir.y, 0.0));
+
     // Diffuse
     float diffuseIntensity = max(dot(normal, lightDirection), 0.0); // Calc the angle (dot product) of the normal and the lightDirection and cutting off negatives with max()
     diffuseColor = phong.diffuse * diffuseIntensity * vec3(texture(material.diffuse, texCoord)); // Read texture uv and multiply it with light.diffuseStrenght and diffuseIntensity
+    diffuseColor = lerp(diffuseColor, fogColor, fog);
 
     // Specular
     vec3 reflectDirection = reflect(-lightDirection, normal);
@@ -137,4 +148,12 @@ vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir){
     calcPhong(light.phong, normal, viewDir, lightDirection, ambientColor, diffuseColor, specularColor);
 
     return (ambientColor + diffuseColor + specularColor);
+}
+
+vec3 lerp(vec3 a, vec3 b, float t){
+    return a + (b - a) * t;
+}
+
+vec3 normalizeRGB(vec3 rgb){
+	return vec3(rgb.x / 255.0f, rgb.y / 255.0f, rgb.z / 255.0f);
 }
