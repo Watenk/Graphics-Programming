@@ -28,6 +28,9 @@ std::vector<float> getCubeVertices();
 std::vector<int> getCubeAttributeLenghts();
 std::vector<unsigned int> getCubeIndices();
 void DrawGameObjects(std::vector<GameObject*> gameObjects);
+void placeGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 pos);
+void orientateGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 rotation);
+void sizeGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 size);
 
 /* Managers */
 GLFWwindow* window;
@@ -96,12 +99,22 @@ int main(){
     GameObject* container = new GameObject(cubeMesh, defaultShader, containerMaterial, cam);
     GameObject* skyBox = new GameObject(cubeMesh, skyboxShader, skyBoxMaterial, cam);
     GameObject* terrain = TerrainUtil::generateTerrain(new Texture2D("res/textures/heightmap.png"), 50.0f, 1.0f, terrainShader, terrainMaterial, cam);
-    //std::vector<GameObject*> backpack = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", defaultShader, cam);
+    std::vector<GameObject*> backpack = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", defaultShader, cam, 64.0f);
+    std::vector<GameObject*> tree = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/tree/tree.obj", defaultShader, cam, 64.0f);
+    std::vector<GameObject*> cat = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/cat/cat.obj", defaultShader, cam, 64.0f);
 
     /* Scene */
     skyBox->transform.setParent(cam->transform);
     container->transform.setPosition(glm::vec3(1.0f));
-
+    placeGameObjects(tree, glm::vec3(100, 4, 100));
+    sizeGameObjects(tree, glm::vec3(10));
+    placeGameObjects(cat, glm::vec3(90, 4, 90));
+    orientateGameObjects(cat, glm::vec3(-90, 20, 0));
+    sizeGameObjects(cat, glm::vec3(0.1f));
+    placeGameObjects(backpack, glm::vec3(90, 7, 90));
+    orientateGameObjects(backpack, glm::vec3(-90, 200, 0));
+    sizeGameObjects(backpack, glm::vec3(0.5f));
+    
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
 
@@ -136,7 +149,9 @@ int main(){
 
         container->draw();
         terrain->draw();
-        //DrawGameObjects(backpack);
+        DrawGameObjects(backpack);
+        DrawGameObjects(tree);
+        DrawGameObjects(cat);
 
         // Draw end -------------
 
@@ -189,6 +204,24 @@ int initGLFW(GLFWwindow* &window){
 void DrawGameObjects(std::vector<GameObject*> gameObjects){
     for (GameObject* gameObject : gameObjects){
         gameObject->draw();
+    }
+}
+
+void placeGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 pos){
+    for (GameObject* gameObject : gameObjects){
+        gameObject->transform.setPosition(pos);
+    }
+}
+
+void orientateGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 rotation){
+    for (GameObject* gameObject : gameObjects){
+        gameObject->transform.setRotation(rotation);
+    }
+}
+
+void sizeGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 size){
+    for (GameObject* gameObject : gameObjects){
+        gameObject->transform.setSize(size);
     }
 }
 
