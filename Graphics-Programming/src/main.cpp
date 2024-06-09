@@ -1,0 +1,314 @@
+#include <iostream>
+#include <string>
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <vector>
+
+#include "Time.h"
+#include "InputHandler.h"
+#include "PlayerController.h"
+#include "lights/lightManager.h"
+#include "GameObject.h"
+#include "util/ModelUtil.h"
+#include "util/TerrainUtil.h"
+
+const char* WINDOWNAME = "Unreal Engine 6";
+const unsigned int WINDOWWIDTH = 1280;
+const unsigned int WINDOWHEIGHT = 720;
+
+/* Forward Declaration */
+int initGLFW(GLFWwindow* &window);
+void framebufferSizeCallback(GLFWwindow* window, int width, int height);  
+void printVec3(glm::vec3 vec3);
+std::vector<float> getCubeVertices();
+std::vector<int> getCubeAttributeLenghts();
+std::vector<unsigned int> getCubeIndices();
+void DrawGameObjects(std::vector<GameObject*> gameObjects);
+void placeGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 pos);
+void orientateGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 rotation);
+void sizeGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 size);
+
+/* Managers */
+GLFWwindow* window;
+InputHandler* input;
+Watenk::Time* watenkTime;
+PlayerController* player;
+Camera* cam;
+LightManager* lightManager;
+
+int main(){
+
+    /* GLFW Setup */
+    int initCode = initGLFW(window);
+    if (initCode != 0) return initCode;
+
+    /* Configure GLFW */
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+
+    /* Configure OpenGL */
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wireframe Mode
+    glEnable(GL_DEPTH_TEST); // Enable Depth Test
+    // Cull backfaces
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    /* Managers */
+    input = new InputHandler(window);
+    watenkTime = new Watenk::Time();
+    cam = new Camera(WINDOWWIDTH, WINDOWHEIGHT, POSITION, 90.0f, 0.1f, 5000.0f);
+    player = new PlayerController(input, watenkTime, cam, 5.0f);
+    lightManager = new LightManager();
+
+    /* Shaders */
+    Shader* defaultShader = new Shader();
+    Shader* skyboxShader = new Shader("skybox");
+    Shader* terrainShader = new Shader("terrain");
+    Shader* blueLightShader = new Shader("color");
+
+    /* Materials */
+    Material* emptyMaterial = new Material();
+
+    Material* skyBoxMaterial = new Material();
+    skyBoxMaterial->shininess = 64.0f;
+
+    Material* containerMaterial = new Material();
+    containerMaterial->diffuseTexture = new Texture2D("res/textures/container.png");
+    containerMaterial->specularTexture = new Texture2D("res/textures/containerSpecular.png");
+    containerMaterial->shininess = 64.0f;
+
+    Material* terrainMaterial = new Material();
+    terrainMaterial->diffuseTexture = new Texture2D("res/textures/terrain/heightmap.png");
+    terrainMaterial->specularTexture = new Texture2D("res/textures/terrain/heightmap.png");
+    terrainMaterial->normalTexture = new Texture2D("res/textures/terrain/heightmapNormal.png");
+    terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/dirt.jpg"));
+    terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/sand.jpg"));
+    terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/grass.png"));
+    terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/rock.jpg"));
+    terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/snow.jpg"));
+    terrainMaterial->shininess = 0.0f;
+
+    /* Manual Meshes */
+    Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices());
+
+    /* GameObjects */
+    GameObject* container = new GameObject(cubeMesh, defaultShader, containerMaterial, cam);
+    GameObject* blueLightGameObject = new GameObject(cubeMesh, blueLightShader, emptyMaterial, cam);
+    GameObject* skyBox = new GameObject(cubeMesh, skyboxShader, skyBoxMaterial, cam);
+    GameObject* terrain = TerrainUtil::generateTerrain(new Texture2D("res/textures/heightmap.png"), 50.0f, 1.0f, terrainShader, terrainMaterial, cam);
+    std::vector<GameObject*> backpack = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", defaultShader, cam, 64.0f);
+    std::vector<GameObject*> tree = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/tree/tree.obj", defaultShader, cam, 64.0f);
+    std::vector<GameObject*> cat = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/cat/cat.obj", defaultShader, cam, 64.0f);
+
+    /* Scene */
+    skyBox->transform.setParent(cam->transform);
+    container->transform.setPosition(glm::vec3(1.0f));
+    placeGameObjects(tree, glm::vec3(100, 4, 100));
+    sizeGameObjects(tree, glm::vec3(10));
+    placeGameObjects(cat, glm::vec3(90, 4, 90));
+    orientateGameObjects(cat, glm::vec3(-90, 20, 0));
+    sizeGameObjects(cat, glm::vec3(0.1f));
+    placeGameObjects(backpack, glm::vec3(90, 7, 90));
+    orientateGameObjects(backpack, glm::vec3(-90, 200, 0));
+    sizeGameObjects(backpack, glm::vec3(0.5f));
+    blueLightGameObject->transform.setPosition(glm::vec3(95, 5, 95));
+    blueLightGameObject->transform.setSize(glm::vec3(0.5f));
+    blueLightShader->setVec3("color", glm::vec3(0.0f, 0.0f, 1.0f));
+    
+    /* Lights */
+    lightManager->addShader(defaultShader);
+    lightManager->addShader(terrainShader);
+
+    PointLight blueLight;
+    blueLight.color = glm::vec3(0.0f, 0.0f, 1.0f);
+    blueLight.position = blueLightGameObject->transform.getPosition();
+    lightManager->addPointLight(blueLight);
+    
+    /* Loop until the user closes the window */
+    while (!glfwWindowShouldClose(window)){
+
+        /* Managers */
+        input->update(window);
+        watenkTime->update();
+
+        DirectionalLight dirLight = lightManager->getDirectionalLight();
+        dirLight.direction = glm::normalize(glm::vec3(glm::sin(glfwGetTime()), 0.5f, glm::cos(glfwGetTime())));
+        lightManager->setDirectionalLight(dirLight);
+
+        /* Uniform Updates */
+        defaultShader->setVec3("viewPos", cam->transform->getPosition());
+        skyboxShader->setVec3("viewPos", cam->transform->getPosition());
+        skyboxShader->setVec3("lightDirection", lightManager->getDirectionalLight().direction);
+        terrainShader->setVec3("viewPos", cam->transform->getPosition());
+
+        /* GameObject Updates */
+        //container->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
+
+        /* Buffers */
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Draw ----------------
+        
+	    glDisable(GL_CULL_FACE);
+	    glDisable(GL_DEPTH_TEST);
+        skyBox->draw();
+        glEnable(GL_CULL_FACE);
+	    glEnable(GL_DEPTH_TEST);
+
+        container->draw();
+        terrain->draw();
+        blueLightGameObject->draw();
+        DrawGameObjects(backpack);
+        DrawGameObjects(tree);
+        DrawGameObjects(cat);
+
+        // Draw end -------------
+
+        glfwSwapBuffers(window);
+        glfwPollEvents(); // Windows Window Events
+    }
+
+    /* managers */
+    delete input;
+    delete watenkTime;
+    delete player;
+
+    glfwTerminate();
+    return 0;
+}
+
+int initGLFW(GLFWwindow* &window){
+
+    /* Init Lib */
+    if (!glfwInit()) return -1;
+
+    /* Winow Hints */ 
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+
+    /* Create a windowed mode window and its OpenGL context */ 
+    window = glfwCreateWindow(WINDOWWIDTH, WINDOWHEIGHT, WINDOWNAME, NULL, NULL);
+    if (!window){
+        std::cout << "Failed to create glfw window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+
+    /* Make the window's context current */
+    glfwMakeContextCurrent(window);
+
+    /* Set callback for window size change */
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);  
+
+    /* Load GLAD */
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
+        std::cout << "Failed to load GLAD" << std::endl;
+        glfwTerminate();
+        return -2;
+    }
+    return 0;
+}
+
+void DrawGameObjects(std::vector<GameObject*> gameObjects){
+    for (GameObject* gameObject : gameObjects){
+        gameObject->draw();
+    }
+}
+
+void placeGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 pos){
+    for (GameObject* gameObject : gameObjects){
+        gameObject->transform.setPosition(pos);
+    }
+}
+
+void orientateGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 rotation){
+    for (GameObject* gameObject : gameObjects){
+        gameObject->transform.setRotation(rotation);
+    }
+}
+
+void sizeGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 size){
+    for (GameObject* gameObject : gameObjects){
+        gameObject->transform.setSize(size);
+    }
+}
+
+void framebufferSizeCallback(GLFWwindow* window, int width, int height){
+    glViewport(0, 0, width, height);
+}  
+
+void printVec3(glm::vec3 vec3){
+    std::cout << "(" << vec3.x << ", " << vec3.y << ", " << vec3.z << ")" << std::endl;
+}
+
+std::vector<float> getCubeVertices(){
+    std::vector<float> cubeVertices = {
+    // positions           // normals         // tex coords    //tangents      //bitangents
+    0.5f, -0.5f, -0.5f,    0.f, -1.f, 0.f,    1.f, 1.f,        -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+    0.5f, -0.5f, 0.5f,     0.f, -1.f, 0.f,    1.f, 0.f,        -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+    -0.5f, -0.5f, 0.5f,    0.f, -1.f, 0.f,    0.f, 0.f,        -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+    -0.5f, -0.5f, -.5f,    0.f, -1.f, 0.f,    0.f, 1.f,        -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+
+    0.5f, 0.5f, -0.5f,     1.f, 0.f, 0.f,     1.f, 1.f,       0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
+    0.5f, 0.5f, 0.5f,      1.f, 0.f, 0.f,     1.f, 0.f,       0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
+
+    0.5f, 0.5f, 0.5f,      0.f, 0.f, 1.f,     1.f, 0.f,       1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
+    -0.5f, 0.5f, 0.5f,     0.f, 0.f, 1.f,     0.f, 0.f,       1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
+
+    -0.5f, 0.5f, 0.5f,    -1.f, 0.f, 0.f,     0.f, 0.f,       0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
+    -0.5f, 0.5f, -.5f,    -1.f, 0.f, 0.f,     0.f, 1.f,       0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
+
+    -0.5f, 0.5f, -.5f,    0.f, 0.f, -1.f,     0.f, 1.f,       1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
+    0.5f, 0.5f, -0.5f,    0.f, 0.f, -1.f,     1.f, 1.f,       1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
+
+    -0.5f, 0.5f, -.5f,     0.f, 1.f, 0.f,     1.f, 1.f,       1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+    -0.5f, 0.5f, 0.5f,     0.f, 1.f, 0.f,     1.f, 0.f,       1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+
+    0.5f, -0.5f, 0.5f,     0.f, 0.f, 1.f,     1.f, 1.f,       1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
+    -0.5f, -0.5f, 0.5f,    0.f, 0.f, 1.f,     0.f, 1.f,       1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
+
+    -0.5f, -0.5f, 0.5f,    -1.f, 0.f, 0.f,    1.f, 0.f,        0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
+    -0.5f, -0.5f, -.5f,    -1.f, 0.f, 0.f,    1.f, 1.f,        0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
+
+    -0.5f, -0.5f, -.5f,    0.f, 0.f, -1.f,    0.f, 0.f,        1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
+    0.5f, -0.5f, -0.5f,    0.f, 0.f, -1.f,    1.f, 0.f,        1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
+
+    0.5f, -0.5f, -0.5f,    1.f, 0.f, 0.f,     0.f, 1.f,       0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
+    0.5f, -0.5f, 0.5f,     1.f, 0.f, 0.f,     0.f, 0.f,       0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
+
+    0.5f, 0.5f, -0.5f,     0.f, 1.f, 0.f,     0.f, 1.f,       1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
+    0.5f, 0.5f, 0.5f,      0.f, 1.f, 0.f,     0.f, 0.f,       1.f, 0.f, 0.f,  0.f, 0.f, 1.f   
+    };
+
+    return cubeVertices;
+}
+
+std::vector<unsigned int> getCubeIndices(){
+    std::vector<unsigned int> cubeIndices = {
+        // Down
+        0, 1, 2,      // first triangle
+        0, 2, 3,      // second triangle
+        // Back
+        14, 6, 7,     // first triangle
+        14, 7, 15,    // second triangle
+        // Right
+        20, 4, 5,     // first triangle
+        20, 5, 21,    // second triangle
+        // Left
+        16, 8, 9,     // first triangle
+        16, 9, 17,    // second triangle
+        // Front
+        18, 10, 11,   // first triangle
+        18, 11, 19,   // second triangle
+        // Up
+        22, 12, 13,   // first triangle
+        22, 13, 23,   // second triangle
+    };
+
+    return cubeIndices;
+}
