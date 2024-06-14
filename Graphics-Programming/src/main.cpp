@@ -78,6 +78,7 @@ int main(){
     Material* containerMaterial = new Material();
     containerMaterial->diffuseTexture = new Texture2D("res/textures/container.png");
     containerMaterial->specularTexture = new Texture2D("res/textures/containerSpecular.png");
+    containerMaterial->normalTexture = new Texture2D("res/textures/containerNormal.png");
     containerMaterial->shininess = 64.0f;
 
     Material* terrainMaterial = new Material();
@@ -135,7 +136,7 @@ int main(){
         watenkTime->update();
 
         DirectionalLight dirLight = lightManager->getDirectionalLight();
-        //dirLight.direction = glm::normalize(glm::vec3(glm::sin(glfwGetTime()), -0.5f, glm::cos(glfwGetTime())));
+        dirLight.direction = glm::normalize(glm::vec3(glm::sin(glfwGetTime()), 0.5f, glm::cos(glfwGetTime())));
         lightManager->setDirectionalLight(dirLight);
 
         /* Uniform Updates */
@@ -146,7 +147,7 @@ int main(){
 
         /* GameObject Updates */
         //container->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
-        container->transform.move(glm::vec3(0.0f, 0.0f, 1.0f * watenkTime->getDeltaTime()));
+        //container->transform.move(glm::vec3(0.0f, 0.0f, 1.0f * watenkTime->getDeltaTime()));
 
         /* Buffers */
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
