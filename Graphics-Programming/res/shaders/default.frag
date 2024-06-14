@@ -69,9 +69,9 @@ vec3 normalizeRGB(vec3 rgb);
 void main(){
     // Normal 
     // vec3 norm = texture(material.normal, texCoord).rgb;
-    // norm = normalize(norm * 2.0 - 1.0);
-    // norm = tbn * norm;
-    vec3 norm = normalize(normal);
+    // norm = norm * 2.0 - 1.0;
+    // norm = normalize(tbn * norm);
+    vec3 norm = normal;
 
     vec3 viewDir = normalize(viewPos - fragPos);
 
@@ -84,7 +84,7 @@ void main(){
     // Spot
     // for(int i = 0; i < activeSpotLights; i++) result += calcSpotLight(spotLights[i], norm, fragPos, viewDir);    
     
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4(norm, 1.0);
 }
 
 // This function calculates the phong light colors of: Ambient, Diffuse and specular

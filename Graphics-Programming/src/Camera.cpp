@@ -4,7 +4,7 @@
 Camera::Camera(unsigned int windowWidth, unsigned int windowHeight, glm::vec3 pos, float fov, float nearPlaneCutoff, float farPlaneCutoff) 
                : windowWidth(windowWidth), windowHeight(windowHeight), fov(fov), nearPlaneCutoff(nearPlaneCutoff), farPlaneCutoff(farPlaneCutoff){
     transform = new Transform();
-    transform->setRotation(glm::vec3(0, 0, -90));
+    transform->setRotation(glm::vec3(0, -90, 0));
 }
 
 glm::mat4 Camera::getViewMatrix() const{

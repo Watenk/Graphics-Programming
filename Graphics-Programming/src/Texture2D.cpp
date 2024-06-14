@@ -35,7 +35,7 @@ Texture2D::Texture2D(const std::string& texturePath, const int channelAmount, co
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else{
-        std::cout << "Failed to load Texture2D" << std::endl;
+        std::cout << "Failed to load Texture2D " << texturePath.c_str() << std::endl;
     }
     
     /* Cleanup */
