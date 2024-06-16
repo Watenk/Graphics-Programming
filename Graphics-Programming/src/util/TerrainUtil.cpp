@@ -61,11 +61,6 @@ GameObject* TerrainUtil::generateTerrain(Texture2D* heightmap, float heightScale
         indices.push_back(vertex + 1);
     }
 
-    Texture2D* heightmapSpecular = new Texture2D("res/textures/terrain/heightmap.png");
-    std::vector<Texture2D*> textures;
-    textures.push_back(heightmap);
-    textures.push_back(heightmapSpecular);
-
     const std::vector<int> attributes = {
        // Pos   // Normals   // Tex coords(UV) 
        3,       3,           2,         

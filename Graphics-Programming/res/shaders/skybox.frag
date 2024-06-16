@@ -18,14 +18,14 @@ vec3 lerp(vec3 a, vec3 b, float t);
 
 void main()
 {
-	vec3 topColor = normalizeRGB(vec3(68.0f, 118.0f, 189.0f));
-	vec3 bottomColor = normalizeRGB(vec3(188.0f, 214.0f, 231.0f));
-	vec3 sunColor = normalizeRGB(vec3(255, 200, 50));
+	vec3 topColor = normalizeRGB(vec3(30.0f, 15.0f, 50.0f));
+	vec3 bottomColor = normalizeRGB(vec3(10.0f, 5.0f, 25.0f));
+	vec3 moonColor = normalizeRGB(vec3(255, 255, 255));
 
 	vec3 viewDirection = normalize(fragPos.xyz - viewPos);
-	float sun = max(pow(dot(viewDirection, normalize(lightDirection)), material.shininess), 0.0f);
+	float moon = max(pow(dot(viewDirection, normalize(lightDirection)), material.shininess), 0.0f);
 
-	FragColor = vec4(lerp(bottomColor, topColor, max(viewDirection.y, 0.0)) + sun * sunColor, 1.0f);
+	FragColor = vec4(lerp(bottomColor, topColor, max(viewDirection.y, 0.0)) + moon * moonColor, 1.0f);
 }
 
 vec3 normalizeRGB(vec3 rgb){

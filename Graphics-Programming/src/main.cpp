@@ -13,20 +13,20 @@
 #include "PlayerController.h"
 #include "lights/lightManager.h"
 #include "GameObject.h"
+#include "Firefly.h"
 #include "util/ModelUtil.h"
 #include "util/TerrainUtil.h"
+#include "util/PrimitiveUtil.h"
 
 const char* WINDOWNAME = "Unreal Engine 6";
 const unsigned int WINDOWWIDTH = 1280;
 const unsigned int WINDOWHEIGHT = 720;
+const int FIREFLYAMOUNT = 1;
 
 /* Forward Declaration */
 int initGLFW(GLFWwindow* &window);
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);  
 void printVec3(glm::vec3 vec3);
-std::vector<float> getCubeVertices();
-std::vector<int> getCubeAttributeLenghts();
-std::vector<unsigned int> getCubeIndices();
 void DrawGameObjects(std::vector<GameObject*> gameObjects);
 void placeGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 pos);
 void orientateGameObjects(std::vector<GameObject*> gameObjects, glm::vec3 rotation);
@@ -39,6 +39,9 @@ Watenk::Time* watenkTime;
 PlayerController* player;
 Camera* cam;
 LightManager* lightManager;
+
+/* Scene */
+std::vector<Firefly> fireflys;
 
 int main(){
 
@@ -67,7 +70,6 @@ int main(){
     Shader* defaultShader = new Shader();
     Shader* skyboxShader = new Shader("skybox");
     Shader* terrainShader = new Shader("terrain");
-    Shader* blueLightShader = new Shader("color");
 
     /* Materials */
     Material* emptyMaterial = new Material();
@@ -90,43 +92,34 @@ int main(){
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/grass.png"));
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/rock.jpg"));
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/snow.jpg"));
-    terrainMaterial->shininess = 0.0f;
+    terrainMaterial->shininess = 1.0f;
 
     /* Manual Meshes */
-    Mesh* cubeMesh = new Mesh(GL_STATIC_DRAW, getCubeVertices(), getCubeIndices());
+    Mesh* cubeMesh = PrimitiveUtil::getCube();
 
     /* GameObjects */
     GameObject* container = new GameObject(cubeMesh, defaultShader, containerMaterial, cam);
-    GameObject* blueLightGameObject = new GameObject(cubeMesh, blueLightShader, emptyMaterial, cam);
     GameObject* skyBox = new GameObject(cubeMesh, skyboxShader, skyBoxMaterial, cam);
     GameObject* terrain = TerrainUtil::generateTerrain(new Texture2D("res/textures/terrain/heightmap.png"), 50.0f, 1.0f, terrainShader, terrainMaterial, cam);
     //std::vector<GameObject*> backpack = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/backpack/backpack.obj", defaultShader, cam, 64.0f);
-    //std::vector<GameObject*> tree = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/tree/tree.obj", defaultShader, cam, 64.0f);
-    //std::vector<GameObject*> cat = ModelUtil::loadModel(GL_STATIC_DRAW, "res/models/cat/cat.obj", defaultShader, cam, 64.0f);
 
     /* Scene */
     skyBox->transform.setParent(cam->transform);
     container->transform.setPosition(glm::vec3(1.0f));
-    //placeGameObjects(tree, glm::vec3(100, 4, 100));
-    //sizeGameObjects(tree, glm::vec3(10));
-    //placeGameObjects(cat, glm::vec3(90, 4, 90));
-    //orientateGameObjects(cat, glm::vec3(-90, 20, 0));
-    //sizeGameObjects(cat, glm::vec3(0.1f));
-    //placeGameObjects(backpack, glm::vec3(90, 7, 90));
-    //orientateGameObjects(backpack, glm::vec3(-90, 200, 0));
-    //sizeGameObjects(backpack, glm::vec3(0.5f));
-    blueLightGameObject->transform.setPosition(glm::vec3(95, 5, 95));
-    blueLightGameObject->transform.setSize(glm::vec3(0.5f));
-    blueLightShader->setVec3("color", glm::vec3(0.0f, 0.0f, 1.0f));
+    for (int i = 0; i < FIREFLYAMOUNT; i++){
+        fireflys.push_back(Firefly(cam));
+    }
     
     /* Lights */
+    DirectionalLight dirLight = lightManager->getDirectionalLight();
+    dirLight.phong.ambient = glm::vec3(0.05f);
+    dirLight.phong.diffuse = glm::vec3(0.2f);
+    lightManager->setDirectionalLight(dirLight);
     lightManager->addShader(defaultShader);
     lightManager->addShader(terrainShader);
-
-    PointLight blueLight;
-    blueLight.color = glm::vec3(0.0f, 0.0f, 1.0f);
-    blueLight.position = blueLightGameObject->transform.getPosition();
-    lightManager->addPointLight(blueLight);
+    for (Firefly fly : fireflys){
+        lightManager->addPointLight(fly.light);
+    }
     
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
@@ -146,8 +139,9 @@ int main(){
         terrainShader->setVec3("viewPos", cam->transform->getPosition());
 
         /* GameObject Updates */
-        //container->transform.rotate(glm::vec3(0.0f, 10.0f * watenkTime->getDeltaTime(), 20.0f * watenkTime->getDeltaTime()));
-        //container->transform.move(glm::vec3(0.0f, 0.0f, 1.0f * watenkTime->getDeltaTime()));
+        for (Firefly fly : fireflys){
+            fly.update(watenkTime->getDeltaTime());
+        }
 
         /* Buffers */
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -163,10 +157,9 @@ int main(){
 
         container->draw();
         terrain->draw();
-        blueLightGameObject->draw();
-        //DrawGameObjects(backpack);
-        //DrawGameObjects(tree);
-        //DrawGameObjects(cat);
+        for (Firefly fly : fireflys){
+            fly.gameObject->draw();
+        }
 
         // Draw end -------------
 
@@ -246,71 +239,4 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height){
 
 void printVec3(glm::vec3 vec3){
     std::cout << "(" << vec3.x << ", " << vec3.y << ", " << vec3.z << ")" << std::endl;
-}
-
-std::vector<float> getCubeVertices(){
-    std::vector<float> cubeVertices = {
-    // positions           // normals         // tex coords    //tangents      //bitangents
-    0.5f, -0.5f, -0.5f,    0.f, -1.f, 0.f,    1.f, 1.f,        -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
-    0.5f, -0.5f, 0.5f,     0.f, -1.f, 0.f,    1.f, 0.f,        -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
-    -0.5f, -0.5f, 0.5f,    0.f, -1.f, 0.f,    0.f, 0.f,        -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
-    -0.5f, -0.5f, -.5f,    0.f, -1.f, 0.f,    0.f, 1.f,        -1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
-
-    0.5f, 0.5f, -0.5f,     1.f, 0.f, 0.f,     1.f, 1.f,       0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
-    0.5f, 0.5f, 0.5f,      1.f, 0.f, 0.f,     1.f, 0.f,       0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
-
-    0.5f, 0.5f, 0.5f,      0.f, 0.f, 1.f,     1.f, 0.f,       1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
-    -0.5f, 0.5f, 0.5f,     0.f, 0.f, 1.f,     0.f, 0.f,       1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
-
-    -0.5f, 0.5f, 0.5f,    -1.f, 0.f, 0.f,     0.f, 0.f,       0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
-    -0.5f, 0.5f, -.5f,    -1.f, 0.f, 0.f,     0.f, 1.f,       0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
-
-    -0.5f, 0.5f, -.5f,    0.f, 0.f, -1.f,     0.f, 1.f,       1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
-    0.5f, 0.5f, -0.5f,    0.f, 0.f, -1.f,     1.f, 1.f,       1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
-
-    -0.5f, 0.5f, -.5f,     0.f, 1.f, 0.f,     1.f, 1.f,       1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
-    -0.5f, 0.5f, 0.5f,     0.f, 1.f, 0.f,     1.f, 0.f,       1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
-
-    0.5f, -0.5f, 0.5f,     0.f, 0.f, 1.f,     1.f, 1.f,       1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
-    -0.5f, -0.5f, 0.5f,    0.f, 0.f, 1.f,     0.f, 1.f,       1.f, 0.f, 0.f,  0.f, -1.f, 0.f,
-
-    -0.5f, -0.5f, 0.5f,    -1.f, 0.f, 0.f,    1.f, 0.f,        0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
-    -0.5f, -0.5f, -.5f,    -1.f, 0.f, 0.f,    1.f, 1.f,        0.f, 1.f, 0.f,  0.f, 0.f, 1.f,
-
-    -0.5f, -0.5f, -.5f,    0.f, 0.f, -1.f,    0.f, 0.f,        1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
-    0.5f, -0.5f, -0.5f,    0.f, 0.f, -1.f,    1.f, 0.f,        1.f, 0.f, 0.f,  0.f, 1.f, 0.f,
-
-    0.5f, -0.5f, -0.5f,    1.f, 0.f, 0.f,     0.f, 1.f,       0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
-    0.5f, -0.5f, 0.5f,     1.f, 0.f, 0.f,     0.f, 0.f,       0.f, -1.f, 0.f,  0.f, 0.f, 1.f,
-
-    0.5f, 0.5f, -0.5f,     0.f, 1.f, 0.f,     0.f, 1.f,       1.f, 0.f, 0.f,  0.f, 0.f, 1.f,
-    0.5f, 0.5f, 0.5f,      0.f, 1.f, 0.f,     0.f, 0.f,       1.f, 0.f, 0.f,  0.f, 0.f, 1.f   
-    };
-
-    return cubeVertices;
-}
-
-std::vector<unsigned int> getCubeIndices(){
-    std::vector<unsigned int> cubeIndices = {
-        // Down
-        0, 1, 2,      // first triangle
-        0, 2, 3,      // second triangle
-        // Back
-        14, 6, 7,     // first triangle
-        14, 7, 15,    // second triangle
-        // Right
-        20, 4, 5,     // first triangle
-        20, 5, 21,    // second triangle
-        // Left
-        16, 8, 9,     // first triangle
-        16, 9, 17,    // second triangle
-        // Front
-        18, 10, 11,   // first triangle
-        18, 11, 19,   // second triangle
-        // Up
-        22, 12, 13,   // first triangle
-        22, 13, 23,   // second triangle
-    };
-
-    return cubeIndices;
 }

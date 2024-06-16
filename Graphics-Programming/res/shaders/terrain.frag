@@ -127,8 +127,8 @@ void calcPhong(Phong phong, vec3 normal, vec3 viewDir, vec3 lightDirection, out 
 
     // Fog
     float fog = pow(clamp((dist - 50) / 200, 0, 1), 2);
-    vec3 skyTopColor = normalizeRGB(vec3(68.0f, 118.0f, 189.0f));
-	vec3 skyBottomColor = normalizeRGB(vec3(188.0f, 214.0f, 231.0f));
+    vec3 skyTopColor = normalizeRGB(vec3(30.0f, 15.0f, 50.0f));
+	vec3 skyBottomColor = normalizeRGB(vec3(10.0f, 5.0f, 25.0f));
     vec3 fogColor = lerp(skyBottomColor, skyTopColor, max(viewDir.y, 0.0));
 
     // Ambient
