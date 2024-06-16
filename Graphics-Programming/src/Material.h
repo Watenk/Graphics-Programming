@@ -13,5 +13,5 @@ struct Material{
 
     float shininess;
 
-    Material() : diffuseTexture(nullptr), specularTexture(nullptr), normalTexture(nullptr), shininess(0.0f) {}
+    Material() : diffuseTexture(nullptr), specularTexture(nullptr), normalTexture(nullptr), shininess(1.0f) {}
 };

@@ -5,5 +5,5 @@ struct Attenuation{
     float linear;
     float quadratic;
 
-    Attenuation(float constant = 1.0f, float linear = 0.09f, float quadratic = 0.032f) : constant(constant), linear(linear), quadratic(quadratic) {}
+    Attenuation(float constant = 1.0f, float linear = 0.35f, float quadratic = 0.44f) : constant(constant), linear(linear), quadratic(quadratic) {}
 };

@@ -27,7 +27,6 @@ public:
     int height;
     int channels;
     unsigned char* data;
-    int dataAmount;
 
 private:
     unsigned int texture;

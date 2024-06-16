@@ -41,12 +41,11 @@ struct SpotLight{
     Attenutation attenuation;
 };
 
-#define MAX_POINT_LIGHTS 16
-#define MAX_SPOT_LIGHTS 16
+#define MAX_POINT_LIGHTS 100
+#define MAX_SPOT_LIGHTS 100
 
 in vec3 fragPos;
 in vec2 texCoord;
-in vec3 normal;
 in mat3 tbn;
 
 uniform vec3 viewPos;
@@ -68,10 +67,9 @@ vec3 normalizeRGB(vec3 rgb);
 
 void main(){
     // Normal 
-    // vec3 norm = texture(material.normal, texCoord).rgb;
-    // norm = normalize(norm * 2.0 - 1.0);
-    // norm = tbn * norm;
-    vec3 norm = normalize(normal);
+    vec3 norm = texture(material.normal, texCoord).rgb;
+    norm = norm * 2.0 - 1.0;
+    norm = normalize(tbn * norm);
 
     vec3 viewDir = normalize(viewPos - fragPos);
 
@@ -82,7 +80,7 @@ void main(){
     for(int i = 0; i < activePointLights; i++) result += calcPointLight(pointLights[i], norm, fragPos, viewDir);    
     
     // Spot
-    // for(int i = 0; i < activeSpotLights; i++) result += calcSpotLight(spotLights[i], norm, fragPos, viewDir);    
+    //for(int i = 0; i < activeSpotLights; i++) result += calcSpotLight(spotLights[i], norm, fragPos, viewDir);    
     
     FragColor = vec4(result, 1.0);
 }
@@ -95,8 +93,8 @@ void calcPhong(Phong phong, vec3 normal, vec3 viewDir, vec3 lightDirection, out 
     // Fog
     float dist = length(fragPos - viewPos);
     float fog = pow(clamp((dist - 50) / 200, 0, 1), 2);
-    vec3 skyTopColor = normalizeRGB(vec3(68.0f, 118.0f, 189.0f));
-	vec3 skyBottomColor = normalizeRGB(vec3(188.0f, 214.0f, 231.0f));
+    vec3 skyTopColor = normalizeRGB(vec3(30.0f, 15.0f, 50.0f));
+	vec3 skyBottomColor = normalizeRGB(vec3(10.0f, 5.0f, 25.0f));
     vec3 fogColor = lerp(skyBottomColor, skyTopColor, max(viewDir.y, 0.0));
 
     // Diffuse
