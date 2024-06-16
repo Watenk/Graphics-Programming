@@ -49,8 +49,8 @@ struct SpotLight{
     Attenutation attenuation;
 };
 
-#define MAX_POINT_LIGHTS 16
-#define MAX_SPOT_LIGHTS 16
+#define MAX_POINT_LIGHTS 100
+#define MAX_SPOT_LIGHTS 100
 
 in vec3 fragPos;
 in vec2 texCoord;

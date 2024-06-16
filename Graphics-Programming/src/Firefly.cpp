@@ -2,13 +2,16 @@
 
 #include "util/PrimitiveUtil.h"
 
-Firefly::Firefly(Camera* cam){
-    srand(static_cast<unsigned int>(time(nullptr))); // Seed the random number generator
-
-    gameObject = new GameObject(PrimitiveUtil::getCube(), new Shader("color"), new Material(), cam);
+Firefly::Firefly(glm::vec3 centerPoint, glm::vec3 color, Shader* colorShader, Camera* cam) : centerPoint(centerPoint){
+    gameObject = new GameObject(PrimitiveUtil::getCube(), colorShader, new Material(), cam);
+    light = new PointLight();
+    light->color = color;
+    light->phong.ambient = glm::vec3(0.005f);
+    light->phong.diffuse = glm::vec3(0.1f);
 }
 
 void Firefly::update(float deltaTime){
+    // Movement
     glm::vec3 randomDirection = glm::sphericalRand(1.0f);
     glm::vec3 movement = randomDirection * glm::linearRand(0.0f, radius);
     gameObject->transform.move(glm::normalize(movement) * movementSpeed * deltaTime);
@@ -20,8 +23,5 @@ void Firefly::update(float deltaTime){
        gameObject->transform.move(glm::normalize(directionToCenter) * (distanceToCenter - radius));
     }
 
-}
-
-float Firefly::randomFloat(float min, float max) {
-    return min + static_cast<float>(rand()) / static_cast<float>(RAND_MAX/(max-min));
+   light->position = gameObject->transform.getPosition();
 }

@@ -10,14 +10,11 @@ class Firefly{
 
 public:
     GameObject* gameObject;
-    PointLight light;
-    glm::vec3 centerPoint = glm::vec3(0.0f); 
+    PointLight* light;
+    glm::vec3 centerPoint;
     float radius = 5.0f; 
-    float movementSpeed = 100.0f;
+    float movementSpeed = 50.0f;
 
-    Firefly(Camera* cam);
+    Firefly(glm::vec3 centerPoint, glm::vec3 color, Shader* colorShader, Camera* cam);
     void update(float deltaTime);
-
-private:
-    float randomFloat(float min, float max);
 };

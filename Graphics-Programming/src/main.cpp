@@ -17,11 +17,12 @@
 #include "util/ModelUtil.h"
 #include "util/TerrainUtil.h"
 #include "util/PrimitiveUtil.h"
+#include "util/RandomUtil.h"
 
 const char* WINDOWNAME = "Unreal Engine 6";
 const unsigned int WINDOWWIDTH = 1280;
 const unsigned int WINDOWHEIGHT = 720;
-const int FIREFLYAMOUNT = 1;
+const int FIREFLYAMOUNT = 99;
 
 /* Forward Declaration */
 int initGLFW(GLFWwindow* &window);
@@ -70,6 +71,7 @@ int main(){
     Shader* defaultShader = new Shader();
     Shader* skyboxShader = new Shader("skybox");
     Shader* terrainShader = new Shader("terrain");
+    Shader* colorShader = new Shader("color");
 
     /* Materials */
     Material* emptyMaterial = new Material();
@@ -92,7 +94,6 @@ int main(){
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/grass.png"));
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/rock.jpg"));
     terrainMaterial->extraTextures.push_back(new Texture2D("res/textures/terrain/snow.jpg"));
-    terrainMaterial->shininess = 1.0f;
 
     /* Manual Meshes */
     Mesh* cubeMesh = PrimitiveUtil::getCube();
@@ -107,26 +108,39 @@ int main(){
     skyBox->transform.setParent(cam->transform);
     container->transform.setPosition(glm::vec3(1.0f));
     for (int i = 0; i < FIREFLYAMOUNT; i++){
-        fireflys.push_back(Firefly(cam));
+        Firefly firefly(glm::vec3(2.0f), glm::vec3(216.0f, 165.0f, 13.0f), colorShader, cam);
+        firefly.gameObject->transform.setSize(glm::vec3(0.2f));
+        firefly.centerPoint = glm::vec3(RandomUtil::randomFloat(0, 512), 10.0f, RandomUtil::randomFloat(0, 512));
+        fireflys.push_back(firefly);
     }
     
     /* Lights */
+    lightManager->addShader(defaultShader);
+    lightManager->addShader(terrainShader);
+    lightManager->addShader(colorShader);
+
     DirectionalLight dirLight = lightManager->getDirectionalLight();
     dirLight.phong.ambient = glm::vec3(0.05f);
     dirLight.phong.diffuse = glm::vec3(0.2f);
     lightManager->setDirectionalLight(dirLight);
-    lightManager->addShader(defaultShader);
-    lightManager->addShader(terrainShader);
+
+    PointLight* playerLight = new PointLight();
+    playerLight->color = glm::vec3(40.0f, 75.0f, 140.0f);
+    playerLight->phong.ambient = glm::vec3(0.005f);
+    playerLight->phong.diffuse = glm::vec3(0.1f);
+    lightManager->addPointLight(playerLight);
+
     for (Firefly fly : fireflys){
         lightManager->addPointLight(fly.light);
     }
-    
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)){
 
         /* Managers */
         input->update(window);
         watenkTime->update();
+        lightManager->update();
 
         DirectionalLight dirLight = lightManager->getDirectionalLight();
         dirLight.direction = glm::normalize(glm::vec3(glm::sin(glfwGetTime()), 0.5f, glm::cos(glfwGetTime())));
@@ -139,6 +153,7 @@ int main(){
         terrainShader->setVec3("viewPos", cam->transform->getPosition());
 
         /* GameObject Updates */
+        playerLight->position = cam->transform->getPosition();
         for (Firefly fly : fireflys){
             fly.update(watenkTime->getDeltaTime());
         }
@@ -158,6 +173,7 @@ int main(){
         container->draw();
         terrain->draw();
         for (Firefly fly : fireflys){
+            fly.gameObject->shader->setVec3("color", glm::vec3(fly.light->color.x / 255.0f, fly.light->color.y / 255.0f, fly.light->color.z / 255.0f));
             fly.gameObject->draw();
         }
 
